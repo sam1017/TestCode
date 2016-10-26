@@ -1,0 +1,19 @@
+Y:\packages\apps\Gallery2_Timer\bin\res\bc\raw\convolve3x3.bc \
+  Y:\packages\apps\Gallery2_Timer\gen\com\android\gallery3d\filtershow\filters\ScriptC_convolve3x3.java: \
+  Y:\packages\apps\Gallery2_Timer\src\com\android\gallery3d\filtershow\filters\convolve3x3.rs \
+  E:\tools\android-sdk\build-tools\23.0.3\renderscript\include\rs_core.rsh \
+  E:\tools\android-sdk\build-tools\23.0.3\renderscript\clang-include\stdbool.h \
+  E:\tools\android-sdk\build-tools\23.0.3\renderscript\include/rs_value_types.rsh \
+  E:\tools\android-sdk\build-tools\23.0.3\renderscript\include/rs_object_types.rsh \
+  E:\tools\android-sdk\build-tools\23.0.3\renderscript\include/rs_allocation_data.rsh \
+  E:\tools\android-sdk\build-tools\23.0.3\renderscript\include/rs_atomic.rsh \
+  E:\tools\android-sdk\build-tools\23.0.3\renderscript\include/rs_convert.rsh \
+  E:\tools\android-sdk\build-tools\23.0.3\renderscript\include/rs_debug.rsh \
+  E:\tools\android-sdk\build-tools\23.0.3\renderscript\include/rs_for_each.rsh \
+  E:\tools\android-sdk\build-tools\23.0.3\renderscript\include/rs_io.rsh \
+  E:\tools\android-sdk\build-tools\23.0.3\renderscript\include/rs_math.rsh \
+  E:\tools\android-sdk\build-tools\23.0.3\renderscript\include/rs_matrix.rsh \
+  E:\tools\android-sdk\build-tools\23.0.3\renderscript\include/rs_vector_math.rsh \
+  E:\tools\android-sdk\build-tools\23.0.3\renderscript\include/rs_object_info.rsh \
+  E:\tools\android-sdk\build-tools\23.0.3\renderscript\include/rs_quaternion.rsh \
+  E:\tools\android-sdk\build-tools\23.0.3\renderscript\include/rs_time.rsh

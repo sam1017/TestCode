@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/photopage_bottom_controls"
+        android:padding="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background = "#ececec"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <ImageButton
+                android:id="@+id/photopage_bottom_control_share"
+                android:background="@drawable/photopage_bottom_button_share_background"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft = "20dp"
+                android:layout_alignParentBottom="true"
+                android:visibility="gone"/>
+
+         <ImageButton
+                android:id="@+id/photopage_bottom_control_setpicture_as"
+                android:background="@drawable/photopage_bottom_button_setpicture_background"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf = "@id/photopage_bottom_control_share"
+                android:layout_alignParentBottom="true"
+                android:layout_marginLeft = "50dp"
+                android:visibility="gone"/>
+
+        <ImageButton
+                android:id="@+id/photopage_bottom_control_delete"
+                android:background="@drawable/photopage_bottom_button_delete_background"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight = "20dp"
+                android:layout_alignParentBottom="true"
+                android:visibility="gone"/>
+
+        <ImageButton
+                android:id="@+id/photopage_bottom_control_edit"
+                android:background="@drawable/photopage_bottom_button_edit_background"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_toLeftOf = "@id/photopage_bottom_control_delete"
+                android:layout_alignParentBottom="true"
+                android:layout_marginRight = "50dp"
+                android:visibility="gone"/>
+
+         <!-- added for image refocus. -->
+
+</RelativeLayout>
