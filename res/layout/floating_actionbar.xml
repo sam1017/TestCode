@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+         Copyright (c) 2016-2036  TRANSSION HOLDINGS                               
+                                                                                   
+    PROPRIETARY RIGHTS of TRANSSION HOLDINGS are involved in the                   
+    subject matter of this material.  All manufacturing, reproduction, use,        
+    and sales rights pertaining to this subject matter are governed by the         
+    license agreement.  The recipient of this software implicitly accepts          
+    the terms of the license.                                                      
+                                                                                   
+    Description: For support floating action bar                                   
+    Author:      IB-02533                                                          
+    Version:     V1.0                                                              
+    Date:        2016.12.13                                                        
+    Modification:                                                                  
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:transsion="http://schemas.android.com/apk/res/com.android.gallery3d"
+    android:id="@+id/floating_actionbar_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/actionbar_background_color">
+    <FrameLayout android:id="@+id/floating_actionbar_tab"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/floating_actionbar_height"
+            android:background="@drawable/floating_actionbar_bg">
+        <TabHost android:id="@+id/tab_host"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TabWidget android:id="@android:id/tabs"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:splitMotionEvents="false">
+            </TabWidget>
+            <FrameLayout
+                android:id="@android:id/tabcontent"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                android:splitMotionEvents="false">
+            </FrameLayout>
+        </TabHost>
+    </FrameLayout>
+    <FrameLayout android:id="@+id/floating_actionbar_standant"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/floating_actionbar_height"
+        android:layout_marginTop="@dimen/floating_actionbar_tab_margintop"
+        android:background="@drawable/floating_actionbar_bg">
+        <ImageView android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center_vertical"
+            android:src="@drawable/ic_back_normal"
+            android:id="@+id/floating_actionbar_standant_back_button"/>
+        <!--<com.transsion.gallery3d.ui.FlexImageView android:layout_width="@dimen/floating_actionbar_back_icon_width"
+            android:layout_height="@dimen/floating_actionbar_back_icon_height"
+            android:layout_gravity="left|center_vertical"
+            transsion:src="@drawable/ic_back_normal"
+            android:id="@+id/floating_actionbar_standant_back_button"/>-->
+        <TextView android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/floating_actionbar_standant_text_paddingleft"
+            android:layout_gravity="left|center_vertical"
+            android:id="@+id/floating_actionbar_standant_textview"
+            android:text="@string/app_name"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:textColor="@color/actionbar_standant_textcolor"
+            android:textSize="@dimen/floating_actionbar_standant_textsize"/>
+        <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.27 -->
+        <!-- android:singleLine="true"
+             android:ellipsize="end" -->
+        <!-- transsion end -->
+    </FrameLayout>
+    <FrameLayout android:id="@+id/floating_actionbar_selection_mode"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/floating_actionbar_height"
+            android:background="@drawable/floating_actionbar_bg">
+        <ImageView android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center_vertical"
+            android:background="@drawable/ic_back_normal"
+            android:id="@+id/floating_actionbar_selection_mode_back_button"/>
+        <!--<com.transsion.gallery3d.ui.FlexImageView android:layout_width="@dimen/floating_actionbar_back_icon_width"
+            android:layout_height="@dimen/floating_actionbar_back_icon_height"
+            android:layout_gravity="left|center_vertical"
+            transsion:src="@drawable/ic_back_normal"
+            android:id="@+id/floating_actionbar_selection_mode_back_button"/>-->
+        <TextView android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/floating_actionbar_selection_mode_text_paddingleft"
+            android:layout_gravity="left|center_vertical"
+            android:id="@+id/floating_actionbar_selection_mode_textview"
+            android:text="@string/app_name"
+            android:textColor="@color/actionbar_selection_mode_textcolor"
+            android:textSize="@dimen/floating_actionbar_selection_mode_textsize"/>
+        <ImageView android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|center_vertical"
+            android:paddingRight="@dimen/floating_actionbar_selectionall_paddingright"
+            android:src="@drawable/menu_select_all_un_press"
+            android:id="@+id/floating_actionbar_selection_mode_selectionall"/>
+        <!--<com.transsion.gallery3d.ui.FlexImageView android:layout_width="@dimen/floating_actionbar_selection_icon_width"
+            android:layout_height="@dimen/floating_actionbar_selection_icon_width"
+            android:layout_gravity="right|center_vertical"
+            android:paddingRight="@dimen/floating_actionbar_selectionall_paddingright"
+            transsion:src="@drawable/menu_select_all_un_press"
+            android:id="@+id/floating_actionbar_selection_mode_selectionall"/>-->
+    </FrameLayout>
+    <FrameLayout android:id="@+id/floating_actionbar_cluster"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/floating_actionbar_height"
+        android:background="@drawable/floating_actionbar_bg">
+        <ImageView android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="left|center_vertical"
+            android:background="@drawable/ic_back_normal"
+            android:id="@+id/floating_actionbar_cluster_back_button"/>
+        <!--<com.transsion.gallery3d.ui.FlexImageView android:layout_width="@dimen/floating_actionbar_back_icon_width"
+            android:layout_height="@dimen/floating_actionbar_back_icon_height"
+            android:layout_gravity="left|center_vertical"
+            transsion:src="@drawable/ic_back_normal"
+            android:id="@+id/floating_actionbar_cluster_back_button"/>-->
+        <TextView android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="@dimen/floating_actionbar_cluster_text_paddingleft"
+            android:layout_gravity="left|center_vertical"
+            android:id="@+id/floating_actionbar_cluster_textview"
+            android:text="@string/app_name"
+            android:textColor="@color/actionbar_cluster_textcolor"
+            android:textSize="@dimen/floating_actionbar_cluster_textsize"/>
+        <Spinner android:layout_gravity="right|center_vertical"
+            android:paddingRight="@dimen/floating_actionbar_cluster_spinner_paddingright"
+            android:id="@+id/actionbar_cluster_spinner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            android:entries="@array/album_mode_array"/>
+    </FrameLayout>
+    <!--<View
+        android:layout_width="fill_parent"
+        android:layout_height="1dip"
+        android:background="#ffe0e0e0" />-->
+</FrameLayout>

@@ -16,14 +16,140 @@
 -->
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+             xmlns:trassion="http://schemas.android.com/apk/res/com.android.gallery3d"
              android:layout_width="match_parent"
              android:layout_height="match_parent"
              android:id="@+id/mainView"
-             android:background="@drawable/filtershow_tiled_background">
+             android:background="@color/filtershow_main_background_color">
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.27 -->
+    <!-- xmlns:trassion="http://schemas.android.com/apk/res/com.android.gallery3d" -->
+    <!-- transsion end -->
 
+    <FrameLayout 
+        android:layout_width="match_parent"
+        android:layout_height = "@dimen/filtershow_top_button_layout_height"
+        android:background="#FFFFFFFF"
+        >
+
+        <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.12.27 -->
+        <!-- android:layout_height = "58dp" -->
+        <!-- android:layout_height = "@dimen/filtershow_top_button_layout_height" -->
+        <!-- transsion end -->
+
+        <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.27 -->
+        <com.transsion.gallery3d.ui.RippleView
+            android:layout_width="@dimen/filtershow_top_button_width"
+            android:layout_height="match_parent"
+            android:paddingStart="@dimen/filtershow_top_button_paddingstart"
+            android:paddingTop="@dimen/filtershow_top_button_paddingtop"
+            android:layout_gravity="left"
+            trassion:rv_color="@color/ripple_effect_color">
+        <!-- transsion end -->
+
+        <TextView 
+            android:id="@+id/cancelbutton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textSize="@dimen/filtershow_top_button_textsize"
+            android:text="@string/cancel"
+            android:textColor="@color/filtershow_textview_enable_color"
+            />
+
+        <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.12.27 -->
+        <!-- android:layout_width="wrap_content"
+             android:paddingStart="16dp"
+             android:paddingTop="22dp"
+             android:layout_gravity="left"
+             android:textSize="18sp" -->
+        <!-- android:layout_width="match_parent"
+             android:layout_gravity="center"
+             android:gravity="center"
+             android:textSize="@dimen/filtershow_top_button_textsize" -->
+        <!-- transsion end -->
+
+        <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.27 -->
+        </com.transsion.gallery3d.ui.RippleView>
+        <!-- transsion end -->
+
+        <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.27 -->
+        <com.transsion.gallery3d.ui.RippleView
+            android:layout_width="@dimen/filtershow_top_button_width"
+            android:layout_height="match_parent"
+            android:paddingTop="@dimen/filtershow_top_button_paddingtop"
+            android:layout_gravity="center_horizontal"
+            trassion:rv_color="@color/ripple_effect_color">
+        <!-- transsion end -->
+
+        <TextView 
+            android:id="@+id/resetbutton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textSize="@dimen/filtershow_top_button_textsize"
+            android:text="@string/reset"
+            android:textColor="@color/filtershow_textview_disable_color"
+            />
+
+        <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.12.27 -->
+        <!-- android:layout_width="wrap_content"
+             android:paddingTop="22dp"
+             android:layout_gravity="center_horizontal"
+             android:textSize="18sp" -->
+        <!-- android:layout_width="match_parent"
+             android:scaleType="center"
+             android:layout_gravity="center"
+             android:textSize="@dimen/filtershow_top_button_textsize" -->
+        <!-- transsion end -->
+
+        <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.27 -->
+        </com.transsion.gallery3d.ui.RippleView>
+        <!-- transsion end -->
+
+        <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.27 -->
+        <com.transsion.gallery3d.ui.RippleView
+            android:layout_width="@dimen/filtershow_top_button_width"
+            android:layout_height="match_parent"
+            android:paddingEnd="@dimen/filtershow_top_button_paddingend"
+            android:paddingTop="@dimen/filtershow_top_button_paddingtop"
+            android:layout_gravity="right"
+            trassion:rv_color="@color/ripple_effect_color">
+        <!-- transsion end -->
+
+        <TextView 
+            android:id="@+id/savebutton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:textSize="@dimen/filtershow_top_button_textsize"
+            android:text="@string/save"
+            android:textColor="@color/filtershow_textview_enable_color"
+            />
+
+        <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.12.27 -->
+        <!-- android:layout_width="wrap_content"
+             android:paddingEnd="16dp"
+             android:paddingTop="22dp"
+             android:layout_gravity="right"
+             android:textSize="18sp" -->
+        <!-- android:layout_width="match_parent"
+             android:scaleType="center"
+             android:layout_gravity="center"
+             android:textSize="@dimen/filtershow_top_button_textsize" -->
+        <!-- transsion end -->
+
+        <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.27 -->
+        </com.transsion.gallery3d.ui.RippleView>
+        <!-- transsion end -->
+
+        </FrameLayout>
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_marginTop="58dp"
             android:orientation="vertical">
 
         <FrameLayout
@@ -59,12 +185,20 @@
                         android:id="@+id/editorContainer"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="36dp"
+                        android:layout_marginLeft="44dp"
+                        android:layout_marginRight="44dp"
+                        android:layout_marginBottom="28dp"
                         android:layout_weight="1"/>
 
                 <com.android.gallery3d.filtershow.imageshow.ImageShow
                         android:id="@+id/imageShow"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="36dp"
+                        android:layout_marginLeft="44dp"
+                        android:layout_marginRight="44dp"
+                        android:layout_marginBottom="28dp"
                         android:layout_weight="1"/>
 
 

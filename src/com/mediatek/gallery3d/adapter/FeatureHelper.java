@@ -411,14 +411,16 @@ public class FeatureHelper {
         }
         if (data.subType == MediaData.SubType.CONSHOT
                 && MediaData.BEST_SHOT_MARK_TRUE == data.bestShotMark) {
-            if (sBestShotTexture == null) {
-                sBestShotTexture = new ResourceTexture(context,
-                        R.drawable.m_ic_best_shot);
-            }
-            int texWidth = sBestShotTexture.getWidth();
-            int texHeight = sBestShotTexture.getHeight();
-            sBestShotTexture.draw(canvas, 0, height - texHeight, texWidth,
-                    texHeight);
+            // transsion begin, IB-02533, xieweiwei, delete, 2016.12.15
+            //if (sBestShotTexture == null) {
+            //    sBestShotTexture = new ResourceTexture(context,
+            //            R.drawable.m_ic_best_shot);
+            //}
+            //int texWidth = sBestShotTexture.getWidth();
+            //int texHeight = sBestShotTexture.getHeight();
+            //sBestShotTexture.draw(canvas, 0, height - texHeight, texWidth,
+            //        texHeight);
+            // transsion end
         }
     }
 

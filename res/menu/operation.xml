@@ -14,27 +14,38 @@
      limitations under the License.
 -->
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--//Xiaoyh add for add select all icon at 2016/11/22-->
+    <item
+        android:id="@+id/action_select_all"
+        android:icon="@drawable/menu_select_all_un_press"
+        android:showAsAction="always"
+        android:title="@string/select_all"
+        android:visible="true"/>
+    
     <item android:id="@+id/action_import"
             android:title="@string/Import"
             android:icon="@drawable/ic_menu_ptp_holo_light"
-            android:showAsAction="always|withText"
+            android:showAsAction="never"
             android:visible="false" />
     <!-- Ideally, showAsAction for share_panorama and share should be reversed.
          But, if share_panorama is set to never, it doesn't seem to get promoted
          to the action bar and stays on the overflow menu. -->
-    <item android:id="@+id/action_share_panorama"
-            android:icon="@drawable/ic_menu_share_holo_light"
-            android:title="@string/share_panorama"
-            android:visible="false"
-            android:actionProviderClass="android.widget.ShareActionProvider"
-            android:showAsAction="ifRoom">
-    </item>
+    <!-- transsion begin, IB-02533, xieweiwei, delete, 2016.11.22 -->
+    <!--
     <item android:id="@+id/action_share"
             android:icon="@drawable/ic_menu_share_holo_light"
             android:title="@string/share"
             android:visible="false"
             android:actionProviderClass="android.widget.ShareActionProvider"
             android:showAsAction="never">
+    </item>
+    
+    <item android:id="@+id/action_share_panorama"
+            android:icon="@drawable/ic_menu_share_holo_light"
+            android:title="@string/share_panorama"
+            android:visible="false"
+            android:actionProviderClass="android.widget.ShareActionProvider"
+            android:showAsAction="ifRoom">
     </item>
     <item android:id="@+id/action_hotknot"
             android:icon="@drawable/m_ic_hotknot"
@@ -45,7 +56,7 @@
             android:icon="@drawable/ic_menu_trash_holo_light"
             android:title="@string/delete"
             android:visible="false"
-            android:showAsAction="ifRoom" />
+            android:showAsAction="never" />
     <item android:id="@+id/action_edit"
             android:title="@string/edit"
             android:showAsAction="never"
@@ -83,10 +94,13 @@
             android:showAsAction="never"
             android:visible="false"
             android:title="@string/m_camera_print" />
+            -->
+    <!-- transsion end -->
     <!-- M: [FEATURE.ADD] @{-->
+    <!--
     <item android:id="@+id/m_action_protect_info"
             android:title="@com.mediatek:string/drm_protectioninfo_title"
             android:visible="false"
-            android:showAsAction="never" />
+            android:showAsAction="never" />-->
     <!-- @} -->
 </menu>

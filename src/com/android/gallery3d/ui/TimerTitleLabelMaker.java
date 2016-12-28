@@ -148,7 +148,7 @@ public class TimerTitleLabelMaker {
         }
 
         private void translate() {
-            if (mTimestamp >= 0 && mTimestamp <= SIX_DAY) {
+            if (mTimestamp >= 0 && mTimestamp <= ONE_DAY) {
                 mTitle = transferre();
                 mSubTitle = null;
             } else {

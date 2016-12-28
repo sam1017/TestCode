@@ -81,6 +81,15 @@ import com.mediatek.galleryframework.util.MtkLog;
 
 import java.util.ArrayList;
 
+// transsion begin, IB-02533, xieweiwei, add, 2016.12.15
+import com.transsion.gallery3d.ui.FloatingActionBar;
+// transsion end
+
+// transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+import android.util.Log;
+import android.content.res.Configuration;
+// transsion end
+
 public class ContainerPage extends ActivityState implements
         SelectionManager.SelectionListener {
     private static final String TAG = "MtkGallery2/ContainerPage";
@@ -97,6 +106,9 @@ public class ContainerPage extends ActivityState implements
     private static final int REQUEST_PHOTO = 2;
     private static final int REQUEST_DO_ANIMATION = 3;
     private static final int MSG_PICK_PHOTO = 0;
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.15
+    private static final int MSG_ON_BACK_PRESSS = 1;
+    // transsion end
     private static final int BIT_LOADING_RELOAD = 1;
     private static final float USER_DISTANCE_METER = 0.3f;
 
@@ -166,6 +178,13 @@ public class ContainerPage extends ActivityState implements
                 int bottom) {
 
             int slotViewTop = mActivity.getGalleryActionBar().getHeight();
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.15
+            if (mActivity.getActionBar() == null) {
+                slotViewTop = mActivity.getResources().getDimensionPixelSize(R.dimen.albumpage_mrootview_top);
+            }
+            // transsion end
+
             int slotViewBottom = bottom - top;
             int slotViewRight = right - left;
 
@@ -402,6 +421,15 @@ public class ContainerPage extends ActivityState implements
                     }
                     mActivity.getGLRoot().requestRender();
                     break;
+
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.09
+                case MSG_ON_BACK_PRESSS:
+                    mActivity.getGLRoot().lockRenderThread();
+                    onUpPressed();
+                    mActivity.getGLRoot().unlockRenderThread();
+                    break;
+                // transsion end
+
                 default:
                     throw new AssertionError(message.what);
                 }
@@ -412,18 +440,58 @@ public class ContainerPage extends ActivityState implements
         mActionModeHandler = GalleryPluginUtils.getGalleryPickerPlugin()
                 .onCreate(mActivity, data, mActionModeHandler, mSelectionManager);
         /// @}
+
     }
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.15
+    public FloatingActionBar.ClusterButtonClickListener mClusterListener = new FloatingActionBar.ClusterButtonClickListener() {
+            public boolean onClusterBack() {
+                mHandler.obtainMessage(MSG_ON_BACK_PRESSS).sendToTarget();
+                return true;
+            }
+            public void onClusterModeClick(int mode) {
+            }
+    };
+    // transsion end
 
     @Override
     protected void onResume() {
         MtkLog.i(TAG, "<onResume>");
         super.onResume();
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.15
+        if (mActivity.getActionBar() == null) {
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.27
+            getFloatingActionBar().initCluster(mClusterListener);
+            // transsion end
+            onCreateActionBarHelp();
+        }
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.15
+        showStateBar();
+        // transsion end
+
         if (mFinishStateWhenResume) {
             MtkLog.i(TAG, "<onResume> mFinishStateWhenResume, finishState, return");
             mActivity.getStateManager().finishState(this);
             return;
         }
         mIsActive = true;
+
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.27
+        //// transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+        //if (mActivity.getActionBar() == null) {
+        //// transsion begin
+        //
+        //// transsion begin, IB-02533, xieweiwei, add, 2016.12.15
+        //getFloatingActionBar().initCluster(mClusterListener);
+        //// transsion end
+        //
+        //// transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+        //}
+        //// transsion begin
+        // transsion end
 
         mResumeEffect = mActivity.getTransitionStore()
                 .get(KEY_RESUME_ANIMATION);
@@ -448,9 +516,31 @@ public class ContainerPage extends ActivityState implements
             mNeedUpdateSelection = true;
             // set mRestoreSelectionDone as false if we need to retore selection
             mRestoreSelectionDone = false;
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            if (mActivity.getActionBar() == null) {
+            // transsion begin
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.15
+            getFloatingActionBar().showSelectionModeActionBar();
+            // transsion end
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            }
+            // transsion begin
+
         } else {
             // set mRestoreSelectionDone as true there is no need to retore selection
             mRestoreSelectionDone = true;
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            if (mActivity.getActionBar() == null) {
+            // transsion begin
+            // transsion begin, IB-02533, xieweiwei, modify, 2016.12.15
+            getFloatingActionBar().showClusterActionBar();
+            // transsion end
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            }
+            // transsion begin
+
         }
         /// @}
 
@@ -517,6 +607,15 @@ public class ContainerPage extends ActivityState implements
         /// @}
     }
 
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+    @Override
+    protected void onConfigurationChanged(Configuration config) {
+        super.onConfigurationChanged(config);
+        MtkLog.w(TAG, "onConfigurationChanged");
+        showStateBar();
+    }
+    // transsion end
+
     private void initializeViews() {
         mSelectionManager = new SelectionManager(mActivity, false);
         mSelectionManager.setSelectionListener(this);
@@ -552,7 +651,10 @@ public class ContainerPage extends ActivityState implements
                 ContainerPage.this.onLongTap(slotIndex);
             }
         });
-        mActionModeHandler = new ActionModeHandler(mActivity, mSelectionManager);
+        // transsion begin, IB-02533, xieweiwei, modify, 2016.11.26
+        //mActionModeHandler = new ActionModeHandler(mActivity, mSelectionManager);
+        mActionModeHandler = new ActionModeHandler(mActivity, mSelectionManager, this);
+        // transsion end
         mActionModeHandler.setActionModeListener(new ActionModeListener() {
             @Override
             public boolean onActionItemClicked(MenuItem item) {
@@ -616,6 +718,18 @@ public class ContainerPage extends ActivityState implements
         mAlbumView.setHighlightItemPath(null);
         mSlotView.invalidate();
     }
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.15
+    public void onCreateActionBarHelp() {
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+        if (mActivity.getActionBar() == null) {
+        // transsion begin
+        getFloatingActionBar().setClusterTitle("");
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+        }
+        // transsion begin
+    }
+    // transsion end
 
     @Override
     protected boolean onCreateActionBar(Menu menu) {
@@ -736,6 +850,14 @@ public class ContainerPage extends ActivityState implements
             mSlotView.startRisingAnimation();
             break;
         }
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.20
+        case ActionModeHandler.RESULT_MOVE_IMAGE:
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.23
+            data.putExtra(GalleryActivity.KEY_MOVE_ONE_CONSHOT_PIC, "true");
+            // transsion end
+            mActionModeHandler.onStateResult(request, result, data);
+            break;
+        // transsion end
         default:
             break;
         }
@@ -986,4 +1108,10 @@ public class ContainerPage extends ActivityState implements
         mActionModeHandler.updateSupportedOperation();
         mActionModeHandler.updateSelectionMenu();
     }
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.15
+    public FloatingActionBar getFloatingActionBar() {
+        return mActivity.getFloatingActionBar();
+    }
+    // transsion end
 }

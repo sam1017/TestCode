@@ -37,6 +37,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Configuration;
+import android.graphics.Color;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.nfc.NfcAdapter;
@@ -52,6 +53,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ActivityChooserModel;
 import android.widget.RelativeLayout;
 import android.widget.ShareActionProvider;
@@ -95,11 +97,9 @@ import com.android.gallery3d.ui.PhotoView;
 import com.android.gallery3d.ui.SelectionManager;
 import com.android.gallery3d.ui.SynchronizedHandler;
 import com.android.gallery3d.util.GalleryUtils;
-import com.android.gallery3d.util.Log;
 import com.android.gallery3d.util.UsageStatistics;
 import com.android.gallery3d.util.ThreadPool.Job;
 import com.android.gallery3d.util.ThreadPool.JobContext;
-
 import com.mediatek.gallery3d.adapter.ContainerPage;
 import com.mediatek.gallery3d.adapter.FeatureHelper;
 import com.mediatek.gallery3d.adapter.PhotoPlayFacade;
@@ -115,6 +115,24 @@ import com.mediatek.galleryfeature.refocus.RefocusActivity;
 import com.mediatek.galleryframework.base.ExtItem;
 import com.mediatek.galleryframework.base.LayerManager;
 import com.mediatek.galleryframework.base.MediaData;
+import android.util.Log;
+
+// transsion begin, IB-02533, xieweiwei, add, 2016.11.18
+import android.widget.PopupMenu;
+import android.view.MenuItem;
+// transsion end
+
+// transsion begin, IB-02533, xieweiwei, delete, 2016.12.10
+//// transsion begin, IB-02533, xieweiwei, add, 2016.11.22
+//import android.app.StatusBarManager;
+//// transsion end
+// transsion end
+
+// transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+import com.transsion.gallery3d.ui.FloatingActionBar;
+import com.android.gallery3d.ui.GLRoot;
+import android.widget.ImageView;
+// transsion end
 
 public abstract class PhotoPage extends ActivityState implements
         PhotoView.Listener, AppBridge.Server,
@@ -140,6 +158,15 @@ public abstract class PhotoPage extends ActivityState implements
     private static final int MSG_UPDATE_SHARE_URI = 15;
     private static final int MSG_UPDATE_PANORAMA_UI = 16;
     private static final int MSG_SHARE = 17;
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.18
+    private static final int MSG_SLIDESHOW = 18;
+    // transsion end
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.09
+    private static final int MSG_ON_BACK_PRESSS = 19;
+    private static final int MSG_GO_TO_GRID = 20;
+    // transsion end
 
     private static final int HIDE_BARS_TIMEOUT = 3500;
     private static final int UNFREEZE_GLROOT_TIMEOUT = 250;
@@ -264,6 +291,24 @@ public abstract class PhotoPage extends ActivityState implements
     private MuteVideo mMuteVideo;
     // / @}
 
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.18
+    PopupMenu mBottomPopupMenuMore = null;
+    // transsion end
+
+    // transsion begin, IB-02533, xieweiwei, delete, 2016.12.10
+    //// transsion begin, IB-02533, xieweiwei, add, 2016.11.22
+    //StatusBarManager mStatusBarManager = null;
+    //// transsion end
+    // transsion end
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+    private Bundle mBundle = null;
+    // transsion end
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.12
+    public FloatingActionBar mFloatingActionBar;
+    // transsion end
+
     private final PanoramaSupportCallback mUpdatePanoramaMenuItemsCallback = new PanoramaSupportCallback() {
         @Override
         public void panoramaInfoAvailable(MediaObject mediaObject, boolean isPanorama,
@@ -328,20 +373,73 @@ public abstract class PhotoPage extends ActivityState implements
         }
     };
 
-    @Override
+    
+    /* (non-Javadoc)
+	 * @see com.android.gallery3d.app.ActivityState#onConfigurationChanged(android.content.res.Configuration)
+	 */
+	@Override
+	protected void onConfigurationChanged(Configuration config) {
+		// TODO Auto-generated method stub
+		super.onConfigurationChanged(config);
+		Log.w(TAG, "onConfigurationChanged ");
+    	mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+    	mActivity.getGLRoot().setLightsOutMode(true);
+	}
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.13
+    public void doTranssionFullScreen(boolean isFullScreen) {
+        if (isFullScreen) {
+            mActivity.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            mActivity.getWindow().clearFlags(
+                    WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+        } else {
+            int flag = WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN;
+            mActivity.getWindow().setFlags(flag, flag);
+            mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            mActivity.getGLRoot().setLightsOutMode(true);
+        }
+    }
+    // transsion end
+
+	@Override
     public void onCreate(Bundle data, Bundle restoreState) {
         super.onCreate(data, restoreState);
         mActionBar = mActivity.getGalleryActionBar();
-        mSelectionManager = new SelectionManager(mActivity, false);
+        // transsion begin, IB-02533, xieweiwei, modidy, 2016.12.12
+        //mSelectionManager = new SelectionManager(mActivity, false);
+        mSelectionManager = new SelectionManager(mActivity, false, true);
+        // transsion end
         mMenuExecutor = new MenuExecutor(mActivity, mSelectionManager);
 
         mPhotoView = new PhotoView(mActivity);
         mPhotoView.setListener(this);
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+        // do create function later in onResume process
+        mBundle = data;
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.02
+        //// transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+        //doCreate();
+        //mHasDoCreate = true;
+        // transsion end
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.03
+        doCreate();
+        mHasDoCreate = true;
+        // transsion end
+    }
+
+    // implements doCreate function in base class
+    protected void doCreate() {
+        Bundle data = mBundle;
+    // transsion end
+
         mRootPane.addComponent(mPhotoView);
         mApplication = (GalleryApp) ((Activity) mActivity).getApplication();
         mOrientationManager = mActivity.getOrientationManager();
         mActivity.getGLRoot().setOrientationSource(mOrientationManager);
-
         mHandler = new SynchronizedHandler(mActivity.getGLRoot()) {
             @Override
             public void handleMessage(Message message) {
@@ -497,6 +595,36 @@ public abstract class PhotoPage extends ActivityState implements
                             .getAndroidContext().getResources().getString(R.string.share)));
                         break;
                     }
+                    // transsion begin, IB-02533, xieweiwei, add, 2016.11.18
+                    case MSG_SLIDESHOW: {
+
+                        // transsion begin, IB-02533, xieweiwei, add, 2016.12.12
+                        if (mActivity.getActionBar() == null) {
+                            getFloatingActionBar().hideActionBar();
+                        }
+                        // transsion end
+
+                        gotoSlideShowMode();
+                        break;
+                    }
+                    // transsion end
+
+                    // transsion begin, IB-02533, xieweiwei, add, 2016.12.09
+                    case MSG_ON_BACK_PRESSS:
+                        mActivity.getGLRoot().lockRenderThread();
+                        onUpPressed();
+                        mActivity.getGLRoot().unlockRenderThread();
+                        break;
+                    // transsion end
+
+                    // transsion begin, IB-02533, xieweiwei, add, 2016.12.09
+                    case MSG_GO_TO_GRID:
+                        mActivity.getGLRoot().lockRenderThread();
+                        switchToGrid();
+                        mActivity.getGLRoot().unlockRenderThread();
+                        break;
+                    // transsion end
+
                     default: throw new AssertionError(message.what);
                 }
             }
@@ -514,6 +642,7 @@ public abstract class PhotoPage extends ActivityState implements
         Log.i(TAG, "<onCreate> mSetPathString = " + mSetPathString + ", mReadOnlyView = "
                 + mReadOnlyView);
         /// @}
+
         mOriginalSetPathString = mSetPathString;
         setupNfcBeamPush();
         String itemPathString = data.getString(KEY_MEDIA_ITEM_PATH);
@@ -533,7 +662,7 @@ public abstract class PhotoPage extends ActivityState implements
             if (!mSetPathString.equals("/local/all/0")
                     && SecureSource.isSecurePath(mSetPathString)) {
                 Log.d(TAG, "<onCreate> secure album");
-                mFlags |= FLAG_SHOW_WHEN_LOCKED;
+                mFlags |= (FLAG_SHOW_WHEN_LOCKED | FLAG_HIDE_STATUS_BAR);
                 mSecureAlbum = (SecureAlbum) mActivity.getDataManager()
                         .getMediaSet(mSetPathString);
                 mSecureAlbum.clearAll();
@@ -620,7 +749,7 @@ public abstract class PhotoPage extends ActivityState implements
             // When launch from camera, and not from secure camera, we show empty item
             // after delete all images.
             } else if (mLaunchFromCamera && mSecureAlbum == null) {
-                mSetPathString = "/filter/empty/{" + mSetPathString + "}";
+                //mSetPathString = "/filter/empty/{" + mSetPathString + "}";
                 Log.i(TAG, "<onCreate> launch from camera, not secure, mSetPathString = "
                         + mSetPathString);
             /// @}
@@ -702,9 +831,24 @@ public abstract class PhotoPage extends ActivityState implements
                     if (!mSkipUpdateCurrentPhoto) {
                         if (item != null) {
                             MediaItem photo = mModel.getMediaItem(0);
-                            if (photo != null) updateCurrentPhoto(photo);
+                            // transsion begin, IB-02533, xieweiwei, modify, 2016.12.10
+                            //if (photo != null) updateCurrentPhoto(photo);
+                            if (photo != null) {
+                                if (updateCurrentPhotoHelp(photo)) {
+                                    if (mActivity.getActionBar() == null) {
+                                        updateActionBarTitle();
+                                    }
+                                }
+                            }
+                            // transsion end
                         }
+                        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+                        if (mActivity.getActionBar() != null) {
+                        // transsion end
                         updateBars();
+                        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+                        }
+                        // transsion end
                     }
                     // Reset the timeout for the bars after a swipe
                     /// M: [DEBUG.ADD] @{
@@ -799,7 +943,64 @@ public abstract class PhotoPage extends ActivityState implements
         /// M: [FEATURE.ADD] add backward controller for layer @{
         mPhotoView.setBackwardControllerForLayerManager(mBackwardContollerForLayer);
         /// @}
+
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.10
+        //// transsion begin, IB-02533, xieweiwei, add, 2016.11.22
+        //mStatusBarManager = (StatusBarManager) mActivity.getSystemService(Context.STATUS_BAR_SERVICE);
+        //// transsion end
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.12
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.15
+        //if (!mPhotoView.getFilmMode()) {
+        //    getFloatingActionBar().initStandant(new FloatingActionBar.StandantButtonClickListener() {
+        //        public boolean onStandantBack() {
+        //               mHandler.obtainMessage(MSG_ON_BACK_PRESSS).sendToTarget();
+        //               return true;
+        //        }
+        //    });
+        //    if (mActivity.getActionBar() == null) {
+        //        getFloatingActionBar().showStandantActionBar();
+        //    }
+        //}
+        // transsion end
+        // transsion end
     }
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.12
+    public FloatingActionBar.ClusterButtonClickListener mClusterListener = new FloatingActionBar.ClusterButtonClickListener() {
+        public boolean onClusterBack() {
+            mHandler.obtainMessage(MSG_ON_BACK_PRESSS).sendToTarget();
+            return true;
+        }
+        public void onClusterModeClick(int mode) {
+            if (mode == FloatingActionBar.ALBUM_GRID_MODE_SELECTED) {
+                mHandler.obtainMessage(MSG_GO_TO_GRID).sendToTarget();
+            }
+        }
+    };
+    // transsion end
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.12
+    public FloatingActionBar getFloatingActionBar() {
+        // transsion begin, IB-02533, xieweiwei, modify, 2016.12.16
+        //if (mFloatingActionBar == null) {
+        //    mFloatingActionBar = new FloatingActionBar(mActivity, true);
+        //}
+        //return mFloatingActionBar;
+        return mActivity.getFloatingActionBar();
+        // transsion end
+    }
+    // transsion end
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.15
+    public FloatingActionBar.StandantButtonClickListener mStandantListener = new FloatingActionBar.StandantButtonClickListener() {
+        public boolean onStandantBack() {
+            mHandler.obtainMessage(MSG_ON_BACK_PRESSS).sendToTarget();
+            return true;
+        }
+    };
+    // transsion end
 
     @Override
     public void onPictureCenter(boolean isCamera) {
@@ -824,12 +1025,13 @@ public abstract class PhotoPage extends ActivityState implements
             /// M: [FEATURE.ADD] Image refocus @{
             /// @}
             case R.id.photopage_bottom_control_edit:
+    	    case R.id.photopage_bottom_control_makeup:
                 return mHaveImageEditor && mShowBars && !mReadOnlyView
                         && !mPhotoView.getFilmMode()
                         && (mCurrentPhoto.getSupportedOperations() & MediaItem.SUPPORT_EDIT) != 0
                         && mCurrentPhoto.getMediaType() == MediaObject.MEDIA_TYPE_IMAGE;
-            case R.id.photopage_bottom_control_setpicture_as:
-                return mShowBars&&mCurrentPhoto.getMediaType() == MediaObject.MEDIA_TYPE_IMAGE;
+            case R.id.photopage_bottom_control_more:
+                return mShowBars;
             case R.id.photopage_bottom_control_share:
                 return mShowBars;
             case R.id.photopage_bottom_control_delete:
@@ -874,17 +1076,87 @@ public abstract class PhotoPage extends ActivityState implements
                 mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SHARE, this), 10);
                 return;
             case R.id.photopage_bottom_control_delete:
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.12
+                if (mActivity.getActionBar() == null) {
+                    launchPicturedeleteHelp();
+                } else {
+                // transsion end
+
                 launchPicturedelete();
+
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.12
+                }
+                // transsion end
                 return;
-            case R.id.photopage_bottom_control_setpicture_as:
-                launchSetPictureAs();
-                return;
+            //case R.id.photopage_bottom_control_setpicture_as:
+            //    launchSetPictureAs();
+            //    return;
+            case R.id.photopage_bottom_control_more:
+                // transsion begin, IB-02533, xieweiwei, add, 2016.11.18
+                if (mBottomControls != null) {
+                    onPopupButtonClick(mBottomControls.getMoreButton());
+                }
+                // transsion end
+            	return;
+    	    case R.id.photopage_bottom_control_makeup:
+    			gotoMakeup(2);
+    			return;
             default:
                 return;
         }
     }
 
-    @TargetApi(ApiHelper.VERSION_CODES.JELLY_BEAN)
+	//gangyun tech add begin
+	private void gotoMakeup(int mode)
+	    {
+	        try
+	        {
+	            if (mModel == null)
+	            {
+	                return;
+	            }
+	            MediaItem current = mModel.getMediaItem(0);
+	            if (current == null || (current.getSupportedOperations()
+	                    & MediaObject.SUPPORT_EDIT) == 0)
+	            {
+	                return;
+	            }
+	
+	            Intent intent = new Intent();
+				
+				//intent.setClassName("com.gangyun.makeup", "com.gangyun.sdk.decorate.DecorateActivity");
+							if(mode==5){
+							     intent.setClassName("com.gangyun.beautysnap", "com.gangyun.sdk.decorate.DecorateActivity"); //chuanyin
+							    // intent.setClassName("com.gangyun.chuanyin", "com.gangyun.sdk.decorate.DecorateActivity"); //chuanyin
+							}
+							else if(mode==6){
+							     intent.setClassName("com.gangyun.beautysnap",   "com.gangyun.sdk.imageedit.editphoto.EditPhotoActivity");
+							      //intent.setClassName("com.gangyun.chuanyin",   "com.gangyun.sdk.imageedit.editphoto.EditPhotoActivity");
+							}
+							else{
+							    intent.setClassName("com.gangyun.beautysnap", "com.gangyun.makeup.gallery3d.makeup.MakeUpActivity");
+							    // intent.setClassName("com.gangyun.chuanyin", "com.gangyun.makeup.gallery3d.makeup.MakeUpActivity");
+							}
+	          //  intent.setClassName("com.gangyun.chuanyin", "com.gangyun.makeup.gallery3d.makeup.MakeUpActivity");
+		    //intent.setClassName("com.gangyun.makeup", "com.gangyun.makeup.gallery3d.makeup.MakeUpActivity");
+				intent.putExtra("is_from_third_party", true);
+				intent.putExtra("makeup_module", mode);
+				intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+	            intent.setData(current.getContentUri());
+	            ((Activity) mActivity).startActivity(intent);
+	        }
+	        catch (ActivityNotFoundException e)
+	        {
+	            e.printStackTrace();
+	        }
+	        catch (Exception e)
+	        {
+	            e.printStackTrace();
+	        }
+	    }
+//gangyun tech add end
+
+	@TargetApi(ApiHelper.VERSION_CODES.JELLY_BEAN)
     private void setupNfcBeamPush() {
         if (!ApiHelper.HAS_SET_BEAM_PUSH_URIS) return;
 
@@ -966,16 +1238,38 @@ public abstract class PhotoPage extends ActivityState implements
 
     private void launchPicturedelete(){
         MediaItem current = mModel.getMediaItem(0);
-        Path path = current.getPath();
-        mSelectionManager.deSelectAll();
-        mSelectionManager.toggle(path);
-        //onDeleteImage(path,0);
+        if(current != null){
+            Path path = current.getPath();
+            mSelectionManager.deSelectAll();
+            mSelectionManager.toggle(path);
+            //onDeleteImage(path,0);
 
-        String confirmMsg = mActivity.getResources().getQuantityString(
-                R.plurals.delete_selection, 1);
-        MenuItem item = mMenu.findItem(R.id.action_delete);
-        mMenuExecutor.onMenuClicked(item, confirmMsg, mConfirmDialogListener);
+            String confirmMsg = mActivity.getResources().getQuantityString(
+                    R.plurals.delete_selection, 1);
+            MenuItem item = mMenu.findItem(R.id.action_delete);
+            mMenuExecutor.onMenuClicked(item, confirmMsg, mConfirmDialogListener);
+        }
     }
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.12
+    public void launchPicturedeleteHelp(){
+        MediaItem current = mModel.getMediaItem(0);
+        if(current != null){
+            Path path = current.getPath();
+            mSelectionManager.deSelectAll();
+            mSelectionManager.toggle(path);
+            GLRoot root = mActivity.getGLRoot();
+            root.lockRenderThread();
+            try {
+                String confirmMsg = mActivity.getResources().getQuantityString(
+                    R.plurals.delete_selection, 1);
+                mMenuExecutor.onMenuClicked(R.id.action_delete, confirmMsg, mConfirmDialogListener);
+            } finally {
+                root.unlockRenderThread();
+            }
+        }
+    }
+    // transsion end
 
     private void launchSetPictureAs(){
         MediaItem current = mModel.getMediaItem(0);
@@ -1026,9 +1320,10 @@ public abstract class PhotoPage extends ActivityState implements
             intent.setAction(Intent.ACTION_EDIT);
         }
         intent.putExtra(FilterShowActivity.LAUNCH_FULLSCREEN,
-                mActivity.isFullscreen());
+                false);
         /// M: [FEATURE.ADD] @{
         // for special image, no need to delete origin image when save, such as continuous shot
+        /*
         ExtItem extItem = current.getExtItem();
         if (extItem != null && !extItem.isDeleteOriginFileAfterEdit()) {
             // if current photo is last image in continuous shot group, not
@@ -1048,6 +1343,10 @@ public abstract class PhotoPage extends ActivityState implements
                 intent.putExtra(FilterShowActivity.NEED_SAVE_AS, true);
             }
         }
+        */
+        // do not need to delete origin image when save editing image  -- begin --
+        intent.putExtra(FilterShowActivity.NEED_SAVE_AS, true);
+        // do not need to delete origin image when save editing image  -- end --
         /// @}
         /// M: [FEATURE.ADD] clear refocus Exif and db column when edit photo @{
         if (current.getMediaData() != null
@@ -1101,7 +1400,14 @@ public abstract class PhotoPage extends ActivityState implements
     }
 
     private void updateUIForCurrentPhoto() {
-        if (mCurrentPhoto == null) return;
+    	
+    	//mActivity.toggleStatusBarByOrientation();
+		Log.w(TAG, "updateUIForCurrentPhoto ");
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.06
+        //mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        //mActivity.getGLRoot().setLightsOutMode(true);
+        // transsion end
+    	if (mCurrentPhoto == null) return;
 
         // If by swiping or deletion the user ends up on an action item
         // and zoomed in, zoom out so that the context of the action is
@@ -1119,7 +1425,10 @@ public abstract class PhotoPage extends ActivityState implements
             mActionBar.setShareIntents(null, shareIntent, PhotoPage.this);
         }
         /// @}
-        updateMenuOperations();
+        // transsion begin, IB-02533, xieweiwei, add, 2016.11.18
+        //updateMenuOperations();
+        updateMenuOperationHelp(null);
+        // transsion end
         refreshBottomControlsWhenReady();
         if (mShowDetails) {
             mDetailsHelper.reloadDetails();
@@ -1159,8 +1468,39 @@ public abstract class PhotoPage extends ActivityState implements
         }
     }
 
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.14
+    private boolean updateCurrentPhotoHelp(MediaItem photo) {
+        if (mCurrentPhoto == photo && photo.getDataVersion() == mCurrentVersion) {
+            return false;
+        }
+        mCurrentVersion = photo.getDataVersion();
+        mCurrentPhoto = photo;
+        if (mPhotoView.getFilmMode()) {
+            requestDeferredUpdate();
+        } else {
+            updateUIForCurrentPhoto();
+        }
+        return true;
+    }
+    // transsion end
+
     private void updateMenuOperations() {
         Menu menu = mActionBar.getMenu();
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.18
+        updateMenuOperationHelp(menu);
+    }
+    // transsion end
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.18
+    private void updateMenuOperationHelp(Menu menu) {
+        if (menu == null) {
+            if (mBottomPopupMenuMore == null) {
+                return;
+            }
+            menu = mBottomPopupMenuMore.getMenu();
+        }
+    // transsion end
 
         // it could be null if onCreateActionBar has not been called yet
         if (menu == null) return;
@@ -1197,6 +1537,13 @@ public abstract class PhotoPage extends ActivityState implements
                 MenuItem dcItem = menu.findItem(R.id.m_action_image_dc);
                 ImageDC.setMenuItemTile((Context) mActivity, dcItem);
             }
+            MediaData md = mCurrentPhoto.getMediaData();
+            if (md != null && md.mediaType == MediaData.MediaType.CONTAINER
+                    && md.subType == MediaData.SubType.CONSHOT) {
+                supportedOperations &= ~MediaObject.SUPPORT_FUNNY;
+            }else{
+                supportedOperations |= MediaObject.SUPPORT_FUNNY;
+            }
         }
         /// @}
         /// M: [BUG.ADD] KK native judge mime type, no need AP judge @{
@@ -1214,8 +1561,15 @@ public abstract class PhotoPage extends ActivityState implements
         //add by liangchangwei 2016-9-19 
         supportedOperations &= ~MediaObject.SUPPORT_DELETE;
         supportedOperations &= ~MediaObject.SUPPORT_SHARE;
-        supportedOperations &= ~MediaObject.SUPPORT_SETAS;
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.11.18
+        //supportedOperations &= ~MediaObject.SUPPORT_SETAS;
+        // transsion end
         supportedOperations &= ~MediaObject.SUPPORT_EDIT;
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.11.18
+        supportedOperations &= ~MediaObject.SUPPORT_ROTATE;
+        // transsion end
+
 
         /// @}
         /// M: [BUG.ADD] can not set as wallpaper when no thumbnail @{
@@ -1255,25 +1609,61 @@ public abstract class PhotoPage extends ActivityState implements
         if (mDisableBarChanges) {
             return;
         }
+
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.10
+        //// transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+        //if (mStatusBarManager != null) {
+        //    mStatusBarManager.disable(StatusBarManager.DISABLE_EXPAND);
+        //}
+        //// transsion end
+        // transsion end
+
+        Log.w(TAG,"showBars");
         /// @}
         /// M: [BUG.ADD] automatic layer visibility change @{
         onActionBarVisibilityChange(true);
         /// @}
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        if (mActivity.getActionBar() != null) {
+        // transsion end
+
         if (mShowBars) return;
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        }
+        // transsion end
+
         mShowBars = true;
         mOrientationManager.unlockOrientation();
         mActionBar.show();
         if(mBottomControls != null){
             mBottomControls.show();
         }
-        mActivity.getGLRoot().setLightsOutMode(false);
+        mActivity.getGLRoot().setLightsOutMode(true);
         /// M: [FEATURE.MODIFY] automatic layer visibility change @{
         // refreshHidingMessage();
         if (mAllowAutoHideByHost) {
             refreshHidingMessage();
         }
         /// @}
+        mRootPane.setBackgroundColor(GalleryUtils.intColorToFloatARGBArray(Color.WHITE));
+        mRootPane.invalidate();
         refreshBottomControlsWhenReady();
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+        if (mActivity.getActionBar() == null) {
+        // transsion begin
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+        getFloatingActionBar().showStandantActionBar();
+        doTranssionFullScreen(false);
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+        }
+        // transsion begin
+
     }
 
     private void hideBars() {
@@ -1281,6 +1671,16 @@ public abstract class PhotoPage extends ActivityState implements
         if (mDisableBarChanges) {
             return;
         }
+
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.10
+        //// transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+        //if (mStatusBarManager != null) {
+        //    mStatusBarManager.disable(StatusBarManager.DISABLE_NONE);
+        //}
+        //// transsion end
+        // transsion end
+
+        Log.w(TAG,"hideBars");
         /// @}
         /// M: [FEATURE.ADD] automatic layer visibility change @{
         onActionBarVisibilityChange(false);
@@ -1293,14 +1693,30 @@ public abstract class PhotoPage extends ActivityState implements
         }
         mActivity.getGLRoot().setLightsOutMode(true);
         mHandler.removeMessages(MSG_HIDE_BARS);
+        mRootPane.setBackgroundColor(GalleryUtils.intColorToFloatARGBArray(Color.BLACK));
+        mRootPane.invalidate();
         refreshBottomControlsWhenReady();
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+        if (mActivity.getActionBar() == null) {
+        // transsion begin
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+        getFloatingActionBar().hideActionBar();
+        doTranssionFullScreen(true);
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+        }
+        // transsion begin
+
     }
 
     private void refreshHidingMessage() {
-        mHandler.removeMessages(MSG_HIDE_BARS);
-        if (!mIsMenuVisible && !mPhotoView.getFilmMode()) {
-            mHandler.sendEmptyMessageDelayed(MSG_HIDE_BARS, HIDE_BARS_TIMEOUT);
-        }
+        //mHandler.removeMessages(MSG_HIDE_BARS);
+        //if (!mIsMenuVisible && !mPhotoView.getFilmMode()) {
+        //    mHandler.sendEmptyMessageDelayed(MSG_HIDE_BARS, HIDE_BARS_TIMEOUT);
+        //}
     }
 
     private boolean canShowBars() {
@@ -1343,10 +1759,21 @@ public abstract class PhotoPage extends ActivityState implements
 
     @Override
     protected void onBackPressed() {
-        /// M: [BUG.MODIFY] don't need show bars in camera preview @{
-        /*showBars();*/
-        wantBars();
-        /// @}
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+        if (!mHasDoResume) {
+            return;
+        }
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.01
+        // solve the problem of TFS bug 7017
+        ///// M: [BUG.MODIFY] don't need show bars in camera preview @{
+        ///*showBars();*/
+        //wantBars();
+        ///// @}
+        // transsion end
+
         if (mShowDetails) {
             hideDetails();
         } else if (mAppBridge == null || !switchWithCaptureAnimation(-1)) {
@@ -1383,7 +1810,11 @@ public abstract class PhotoPage extends ActivityState implements
         // it will switch to film strip mode
         if (mLaunchFromCamera && mMediaSet.getMediaItemCount() >= 1
                 && !mPhotoView.getFilmMode()) {
-            mPhotoView.setFilmMode(true);
+            // transsion begin, IB-02533, xieweiwei, modify, 2016.12.05
+            // got back directly to camera if launch from cameras
+            //mPhotoView.setFilmMode(true);
+            super.onBackPressed();
+            // transsion end
             return;
         }
         /// @}
@@ -1393,15 +1824,16 @@ public abstract class PhotoPage extends ActivityState implements
             super.onBackPressed();
             return;
         }
-        // add by liangchangwei 2016-9-18 for fix bug 2560
-        if ((mActivity.getStateManager().getStateCount() == 1)&&(inActionView == true)) {
-            super.onBackPressed();
-            return;
-        }
 
     	Log.w(TAG,"onUpPressed mOriginalSetPathString = " + mOriginalSetPathString);
         if (mOriginalSetPathString == null) return;
 
+        // add by liangchangwei 2016-12-6 for fix bug 7192
+        if ((mActivity.getStateManager().getStateCount() == 1)&&(inActionView == true)) {
+            super.onBackPressed();
+            Log.d(TAG, Log.getStackTraceString(new Throwable()));
+            return;
+        }
         /// M: [FEATURE.MODIFY] [Camera independent from Gallery] @{
         // Launch from camera, and press up key, enter GalleryActivity directly
         /*if (mAppBridge == null) {*/
@@ -1481,13 +1913,15 @@ public abstract class PhotoPage extends ActivityState implements
 
         mActivity.getHotKnot().updateMenu(menu, R.id.action_share, R.id.action_hotknot, false);
         /// @}
-        updateMenuOperations();
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.11.18
+        //updateMenuOperations();
+        // transsion end
         /// M: [BUG.MODIFY] @{
         /* mActionBar.setTitle(mMediaSet != null ? mMediaSet.getName() : ""); */
         // Show title at the action bar
         updateActionBarTitle();
         /// @}
-        return true;
+        return false;
     }
 
     private MenuExecutor.ProgressListener mConfirmDialogListener =
@@ -1552,6 +1986,15 @@ public abstract class PhotoPage extends ActivityState implements
 
     @Override
     protected boolean onItemSelected(MenuItem item) {
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.18
+        return onMenuItemClickHelp(item);
+    }
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.18
+    protected boolean onMenuItemClickHelp(MenuItem item) {
+    // transsion end
+
         if (mModel == null) return true;
         refreshHidingMessage();
         MediaItem current = mModel.getMediaItem(0);
@@ -1777,6 +2220,10 @@ public abstract class PhotoPage extends ActivityState implements
                 mMenuExecutor.onMenuClicked(item, confirmMsg, mConfirmDialogListener);
                 return true;
             /// @}
+                
+            case R.id.photopage_funny:
+        		gotoMakeup(4);
+        		return true;
             default :
                 /// M: [FEATURE.ADD] menu extension @{
                 // return false;
@@ -2062,6 +2509,13 @@ public abstract class PhotoPage extends ActivityState implements
 
     @Override
     public void onPause() {
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+        if (!mHasDoResume) {
+            return;
+        }
+        // transsion end
+
         /// M: [DEBUG.ADD] @{
         Log.i(TAG, "<onPause> begin");
         /// @}
@@ -2071,6 +2525,18 @@ public abstract class PhotoPage extends ActivityState implements
         Log.i(TAG, "<onPause> mNotSetActionBarVisibiltyWhenResume = "
                 + mNotSetActionBarVisibiltyWhenResume);
         /// @}
+
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.10
+        //// transsion begin, IB-02533, xieweiwei, add, 2016.11.22
+        ////mStatusBarManager.disable(StatusBarManager.DISABLE_NONE);
+        //// transsion end
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.01
+        // solve the problem of TFS bug 7017
+        ((GLRootView) mActivity.getGLRoot()).setOnSystemUiVisibilityChangeListener(null);
+        // transsion end
+
         super.onPause();
         mIsActive = false;
         if (mMuteVideo != null) {
@@ -2189,6 +2655,39 @@ public abstract class PhotoPage extends ActivityState implements
         /// M: [DEBUG.ADD] @{
         Log.i(TAG, "<onResume> begin");
         /// @}
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+        // send message to base class to do create and resume function
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.02
+        //// transsion begin, IB-02533, xieweiwei, modify, 2016.11.30
+        ////delayDoResume();
+        //doResume();
+        //mHasDoResume = true;
+        // transsion end
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.03
+        //// transsion begin, IB-02533, xieweiwei, add, 2016.12.02
+        //delayDoResume();
+        //// transsion end
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.03
+        doResume();
+        mHasDoResume = true;
+        // transsion end
+    }
+
+    // implements doResume function in base class
+    public void doResume() {
+    // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.10
+        //// transsion begin, IB-02533, xieweiwei, add, 2016.11.22
+        //// transsion begin, IB-02533, xieweiwei, delete, 2016.11.30
+        //mStatusBarManager.disable(StatusBarManager.DISABLE_EXPAND);
+        //// transsion end
+        //// transsion end
+        // transsionend
+
         super.onResume();
         if (mMuteVideo != null) {
             mMuteVideo.setMuteHasPaused(false);
@@ -2201,6 +2700,28 @@ public abstract class PhotoPage extends ActivityState implements
             mActivity.getStateManager().finishState(this);
             return;
         }
+
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.10
+        //// transsion begin, IB-02533, xieweiwei, add, 2016.12.06
+        //mActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        //mActivity.getGLRoot().setLightsOutMode(true);
+        //// transsion end
+        // transsion end
+
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+        if (mActivity.getActionBar() == null) {
+        // transsion begin
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.15
+        getFloatingActionBar().initStandant(mStandantListener);
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+        }
+        // transsion begin
+
         transitionFromAlbumPageIfNeeded();
 
         mActivity.getGLRoot().freeze();
@@ -2209,6 +2730,10 @@ public abstract class PhotoPage extends ActivityState implements
         mAnimatedContentSharer.onResume();
         /// @}
         setContentPane(mRootPane);
+        hideCameraView();
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.14
+        hideNewFolderView();
+        // transsion end
 
         mModel.resume();
         mPhotoView.resume();
@@ -2242,11 +2767,17 @@ public abstract class PhotoPage extends ActivityState implements
                 mActivity.getGLRoot().setLightsOutMode(true);
             }
             /// @}
+            mRootPane.setBackgroundColor(GalleryUtils.intColorToFloatARGBArray(Color.BLACK));
+        }else{
+            showBars();
         }
         boolean haveImageEditor = GalleryUtils.isEditorAvailable(mActivity, "image/*");
         if (haveImageEditor != mHaveImageEditor) {
             mHaveImageEditor = haveImageEditor;
-            updateMenuOperations();
+            // transsion begin, IB-02533, xieweiwei, delete, 2016.11.18
+            //updateMenuOperations();
+            updateMenuOperationHelp(null);
+            // transsion end
         }
 
         mRecenterCameraOnResume = true;
@@ -2269,6 +2800,13 @@ public abstract class PhotoPage extends ActivityState implements
 
     @Override
     protected void onDestroy() {
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+        if (!mHasDoResume) {
+            return;
+        }
+        // transsion end
+
         if (mAppBridge != null) {
             mAppBridge.setServer(null);
             mScreenNailItem.setScreenNail(null);
@@ -2671,10 +3209,47 @@ public abstract class PhotoPage extends ActivityState implements
                         GalleryActionBar.ALBUM_FILMSTRIP_MODE_SELECTED, this);
             }
             /// @}
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            if (mActivity.getActionBar() == null) {
+            // transsion begin
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.09
+            getFloatingActionBar().setToFilmModeCluster(mClusterListener);
+            // transsion end
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+            getFloatingActionBar().showClusterStandantActionBar();
+            // transsion end
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+            // transsion begin, IB-02533, xieweiwei, modify, 2016.12.27
+            //getFloatingActionBar().setStandantTitle(mMediaSet != null ? mMediaSet.getName() : "");
+            setFloatingStandantTitle(mMediaSet != null ? mMediaSet.getName() : "");
+            // transsion end
+            // transsion end
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            }
+            // transsion begin
+
         } else {
             mActionBar
                     .setDisplayOptions(((mSecureAlbum == null) && (mSetPathString != null)), true);
             mActionBar.setTitle(mCurrentPhoto != null ? mCurrentPhoto.getName() : "");
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            if (mActivity.getActionBar() == null) {
+            // transsion begin
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+            // transsion begin, IB-02533, xieweiwei, modify, 2016.12.27
+            //getFloatingActionBar().setStandantTitle(mCurrentPhoto != null ? mCurrentPhoto.getName() : "");
+            setFloatingStandantTitle(mCurrentPhoto != null ? mCurrentPhoto.getName() : "");
+            // transsion end
+            // transsion end
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            }
+            // transsion begin
         }
     }
 
@@ -2702,7 +3277,6 @@ public abstract class PhotoPage extends ActivityState implements
         }
 
         if (playVideo) {
-            if (mSecureAlbum == null) {
                 /// M: [FEATURE.MODIFY] slide video @{
                 // playVideo(mActivity, item.getPlayUri(), item.getName());
                 if (!FeatureConfig.SUPPORT_SLIDE_VIDEO_PLAY) {
@@ -2712,14 +3286,6 @@ public abstract class PhotoPage extends ActivityState implements
                     playVideo(mActivity, item.getPlayUri(), item.getName());
                 }
                 /// @}
-            } else {
-                /// M: [BEHAVIOR.MODIFY] [Camera independent from Gallery] @{
-                // Play video from secure camera, go into key guard.
-                /*mPhotoView.pause();
-                 mActivity.getStateManager().finishState(this);*/
-                mPlaySecureVideo = true;
-                /// @}
-            }
         }
     }
 
@@ -2876,10 +3442,13 @@ public abstract class PhotoPage extends ActivityState implements
                         mLastSystemUiVis = visibility;
                         if ((diff & View.SYSTEM_UI_FLAG_FULLSCREEN) != 0
                                 && (visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0) {
-                            /// M: [BUG.MODIFY] Don't need show bars in camera preview. @{
-                            /*showBars();*/
-                            wantBars();
-                            /// @}
+                            // transsion begin, IB-02533, delete, 2016.12.01
+                            // solve the problem of TFS bug 7017
+                            ///// M: [BUG.MODIFY] Don't need show bars in camera preview. @{
+                            ////showBars();
+                            //wantBars();
+                            ///// @}
+                            // transsion end
                         }
                     }
                 });
@@ -2929,4 +3498,106 @@ public abstract class PhotoPage extends ActivityState implements
 
         mActivity.getThreadPool().submit(job);
     }
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.18
+    public void onPopupButtonClick(View button) {
+        if (mBottomPopupMenuMore == null) {
+            mBottomPopupMenuMore = new PopupMenu(mActivity, button);
+            mActivity.getMenuInflater().inflate(R.menu.popup_menu_more, mBottomPopupMenuMore.getMenu());
+            updateMenuOperationHelp(null);
+            mBottomPopupMenuMore.setOnMenuItemClickListener(new PopupMenuItemClickImpl());
+        }
+        if (mBottomPopupMenuMore != null) {
+            mBottomPopupMenuMore.show();
+        }
+    }
+
+    private class PopupMenuItemClickImpl implements PopupMenu.OnMenuItemClickListener {
+        @Override
+        public boolean onMenuItemClick(MenuItem item) {
+            int action = item.getItemId();
+            if (action == R.id.action_slideshow) {
+                mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_SLIDESHOW, this), 10);
+            } else {
+                return onMenuItemClickHelp(item);
+            }
+            return true;
+        }
+    };
+
+    private void gotoSlideShowMode() {
+        MediaItem current = mModel.getMediaItem(0);
+        // This is a shield for monkey when it clicks the action bar
+        // menu when transitioning from filmstrip to camera
+        if (current instanceof SnailItem) return ;
+        // TODO: We should check the current photo against the MediaItem
+        // that the menu was initially created for. We need to fix this
+        // after PhotoPage being refactored.
+        if (current == null) {
+            // item is not ready, ignore
+            return ;
+        }
+        int currentIndex = mModel.getCurrentIndex();
+        Path path = current.getPath();
+        Bundle data = new Bundle();
+        /// M: [BUG.MODIFY] fix bug: slideshow doesn't play again
+        // when finish playing the last picture @{
+        String mediaSetPath = mMediaSet.getPath().toString();
+        if (mSnailSetPath != null) {
+            mediaSetPath = mediaSetPath.replace(mSnailSetPath + ",", "");
+            Log.i(TAG, "<onItemSelected> action_slideshow | mediaSetPath: "
+                    + mediaSetPath);
+        }
+        /*data.putString(SlideshowPage.KEY_SET_PATH, mMediaSet.getPath().toString());*/
+        data.putString(SlideshowPage.KEY_SET_PATH, mediaSetPath);
+        /// @}
+        data.putString(SlideshowPage.KEY_ITEM_PATH, path.toString());
+        /// M: [BUG.ADD] currentIndex-- if it is in camera folder @{
+        if (mHasCameraScreennailOrPlaceholder) {
+            currentIndex--;
+        }
+        /// @}
+        data.putInt(SlideshowPage.KEY_PHOTO_INDEX, currentIndex);
+        data.putBoolean(SlideshowPage.KEY_REPEAT, true);
+        mActivity.getStateManager().startStateForResult(
+                SlideshowPage.class, REQUEST_SLIDESHOW, data);
+    }
+    // transsion end
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+    // override delayDoResume function in base class
+    protected void delayDoResume() {
+        // transsion begin, IB-02533, xieweiwei, modify, 2016.12.02
+        //DELAY_TIME_TO_RESUME = 500;
+        DELAY_TIME_TO_RESUME = 100;
+        // transsion end
+        if (mHasDoCreate) {
+            // transsion begin, IB-02533, xieweiwei, modify, 2016.12.02
+            //DELAY_TIME_TO_RESUME = 200;
+            DELAY_TIME_TO_RESUME = 100;
+            // transsion end
+        }
+        super.delayDoResume();
+    }
+    // transsion end
+
+    // transsion begin, IB-02533, xieweiwei, modify, 2016.12.27
+    private String removePostfix(String title) {
+        if (title != null) {
+            String[] parts = title.split("\\.");
+            if (parts.length > 1) {
+                String titleTemp = "";
+                for (int i = 0; i < parts.length - 1; i++) {
+                    titleTemp += parts[i];
+                }
+                return titleTemp;
+            }
+        }
+        return title;
+    }
+
+    public void setFloatingStandantTitle(String title) {
+        getFloatingActionBar().setStandantTitle(removePostfix(title));
+    }
+    // transsion end
 }

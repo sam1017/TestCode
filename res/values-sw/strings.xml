@@ -443,4 +443,23 @@
   </plurals>
     <string name="stop">"kuacha"</string>
     <string name="loop">"mzunguko"</string>
+	
+	<string name="current_week_sunday">"Jumapili"</string>
+    <string name="current_week_monday">"Jumatatu"</string>
+    <string name="current_week_tuesday">"Jumanne"</string>
+    <string name="current_week_wednesday">"Jumatano"</string>
+    <string name="current_week_thursday">"Alhamisi"</string>
+    <string name="current_week_friday">"Ijumaa"</string>
+    <string name="current_week_saturday">"Jumamosi"</string>
+    <string name="last_week_sunday">"Jumapili ya mwisho"</string>
+    <string name="last_week_monday">"Jumatatu ya mwisho"</string>
+    <string name="last_week_tuesday">"Jumanne ya mwisho"</string>
+    <string name="last_week_wednesday">"Jumatano ya mwisho"</string>
+    <string name="last_week_thursday">"Alhamisi ya mwisho"</string>
+    <string name="last_week_friday">"Ijumaa ya mwisho"</string>
+    <string name="last_week_saturday">"Jumamosi ya mwisho"</string>
+    <string name="today">"Leo"</string>
+    <string name="yesterday">"Jana"</string>
+
+    <string name="action_funny">"Marufu"</string>
 </resources>

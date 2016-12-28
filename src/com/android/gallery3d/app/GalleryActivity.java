@@ -64,14 +64,24 @@ public final class GalleryActivity extends AbstractGalleryActivity implements On
 
     public static final String ACTION_REVIEW = "com.android.camera.action.REVIEW";
     public static final String KEY_GET_CONTENT = "get-content";
+    public static final String KEY_GET_MULTIIMAGE = "get-multi-content";
     public static final String KEY_GET_ALBUM = "get-album";
     public static final String KEY_TYPE_BITS = "type-bits";
     public static final String KEY_MEDIA_TYPES = "mediaTypes";
     public static final String KEY_DISMISS_KEYGUARD = "dismiss-keyguard";
 
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.21
+    public static final String KEY_NEW_FOLDER_ICON = "new-folder-icon";
+    // transsion end
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.23
+    public static final String KEY_MOVE_ONE_CONSHOT_PIC = "move-one-conshot-pic";
+    // transsion end
+
     private static final String TAG = "Gallery2/GalleryActivity";
     public static final String KEY_ACTION_FLAG = "action-flag";
     private Dialog mVersionCheckDialog;
+    private int mFirstInitState = -1;
 
     /// M: [TESTCASE.ADD] add for performance test case@{
     public long mStopTime = 0;
@@ -141,7 +151,9 @@ public final class GalleryActivity extends AbstractGalleryActivity implements On
 		// TODO Auto-generated method stub
 		super.setContentView(resId);
 		Log.w(TAG, "setContentView");
-        initTab();
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.19
+        //initTab();
+        // transsion end
 	}
 
 
@@ -152,11 +164,9 @@ public final class GalleryActivity extends AbstractGalleryActivity implements On
         }
 	}
 
-
 	private void initializeByIntent() {
         Intent intent = getIntent();
         String action = intent.getAction();
-
         if (Intent.ACTION_GET_CONTENT.equalsIgnoreCase(action)) {
             startGetContent(intent);
         } else if (Intent.ACTION_PICK.equalsIgnoreCase(action)) {
@@ -180,6 +190,10 @@ public final class GalleryActivity extends AbstractGalleryActivity implements On
             }
         /// @}
         } else {
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.19
+            initViewPagerHelper();
+            initTab();
+            // transsion end
             startDefaultPage();
         }
     }
@@ -191,14 +205,20 @@ public final class GalleryActivity extends AbstractGalleryActivity implements On
         boolean empty = ((MixAlbum) (getDataManager().getMediaSet(MixAlbum.MIXALBUM_PATH_ALL)))
                 .isEmpty();
         Log.w(TAG,"startDefaultPage 1");
-        
-        
         if (!empty) {
-            initCameraTab(GLViewPager.TAB_INDEX_CAMERA);
+            // transsion begin, IB-02533, xieweiwei, modify, 2016.11.30
+            //initAllTab(GLViewPager.TAB_INDEX_ALL);
             getViewPagerHelper().setCurrentTabIndex(GLViewPager.TAB_INDEX_CAMERA);
+            initCameraTab(GLViewPager.TAB_INDEX_CAMERA);
+            mFirstInitState = GLViewPager.TAB_INDEX_CAMERA;
+            // transsion end
         } else {
-            initAllTab(GLViewPager.TAB_INDEX_ALL);
+            // transsion begin, IB-02533, xieweiwei, modify, 2016.11.30
+            //initCameraTab(GLViewPager.TAB_INDEX_CAMERA);
             getViewPagerHelper().setCurrentTabIndex(GLViewPager.TAB_INDEX_ALL);
+            initAllTab(GLViewPager.TAB_INDEX_ALL);
+            mFirstInitState = GLViewPager.TAB_INDEX_ALL;
+            // transsion end
         }
 
         mHandler.postDelayed(new Runnable() {
@@ -220,14 +240,20 @@ public final class GalleryActivity extends AbstractGalleryActivity implements On
     }
 
     public void startOtherTab() {
-        int tab = getViewPagerHelper().getGlViewPager().getCurrentTabIndex();
-        switch (tab) {
+        //int tab = getViewPagerHelper().getGlViewPager().getCurrentTabIndex();
+        switch (mFirstInitState) {
             case GLViewPager.TAB_INDEX_CAMERA:
+                // transsion begin, IB-02533, xieweiwei, modify, 2016.11.30
+                //initCameraTab(GLViewPager.TAB_INDEX_CAMERA);
                 initAllTab(GLViewPager.TAB_INDEX_ALL);
+                // transsion end
                 break;
 
             case GLViewPager.TAB_INDEX_ALL:
+                // transsion begin, IB-02533, xieweiwei, modify, 2016.11.30
+                //initAllTab(GLViewPager.TAB_INDEX_ALL);
                 initCameraTab(GLViewPager.TAB_INDEX_CAMERA);
+                // transsion end
                 break;
             default:
                 throw new UnsupportedOperationException();
@@ -240,7 +266,7 @@ public final class GalleryActivity extends AbstractGalleryActivity implements On
 		Bundle data = new Bundle();
         data.putInt(KEY_ACTION_FLAG, ActivityState.ACTION_FLAG_TABS);
         data.putString(AlbumSetPage.KEY_MEDIA_PATH,
-                getDataManager().getTopSetPath(DataManager.INCLUDE_IMAGE));
+                getDataManager().getTopSetPath(DataManager.INCLUDE_ALL));
         getStateManager().startState(AlbumSetPage.class, data, tabIndeax);
 	}
 

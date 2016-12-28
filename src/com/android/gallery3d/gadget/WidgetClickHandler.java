@@ -187,8 +187,9 @@ public class WidgetClickHandler extends Activity {
             }*/
             /// @}
         } else {
-            Toast.makeText(this,
-                    R.string.no_such_item, Toast.LENGTH_LONG).show();
+            // modify bugID 12072 for zendao remove Toast by liangchangwei 2016-11-25
+            //Toast.makeText(this,
+            //        R.string.no_such_item, Toast.LENGTH_LONG).show();
             intent = new Intent(this, GalleryActivity.class);
         }
         if (tediousBack) {

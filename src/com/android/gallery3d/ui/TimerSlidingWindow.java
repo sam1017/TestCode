@@ -524,4 +524,61 @@ public class TimerSlidingWindow implements TimerDataLoader.DataListener{
         }
     }
 
+    ///M: [MEMORY.ADD] @{
+    /**
+     * Recycle the contentLoader.
+     *
+     * @param entry
+     *            The AlbumEntry whose contentLoader will be recycled
+     */
+    public void recycle(AlbumEntry entry) {
+        if (entry.contentLoader != null) {
+            entry.contentLoader.recycle();
+        }
+    }
+    /// @}
+
+    public int getActiveStart() {
+        return mActiveStart;
+    }
+
+    public boolean isAllActiveSlotsFilled() {
+        int start = mActiveStart;
+        int end = mActiveEnd;
+
+        if (start < 0 || start >= end) {
+            Log.w(TAG, "<isAllActiveSlotFilled> active range not ready yet");
+            return false;
+        }
+
+        AlbumEntry entry;
+        BitmapLoader loader;
+        for (int i = start; i < end; ++i) {
+            entry = mData[i % mData.length];
+            if (entry == null) {
+                Log.i(TAG, "<isAllActiveSlotsFilled> slot " + i
+                        + " is not loaded, return false");
+                return false;
+            }
+            loader = entry.contentLoader;
+            if (loader == null || !loader.isLoadingCompleted()) {
+                Log.i(TAG, "<isAllActiveSlotsFilled> slot " + i
+                        + " is not loaded, return false");
+                return false;
+            }
+        }
+
+        Log.i(TAG, "<isAllActiveSlotsFilled> return true");
+        return true;
+    }
+
+    public MediaItem getMediaItem(int slotIndex) {
+        if (isActiveSlot(slotIndex)) {
+            AlbumEntry entry = mData[slotIndex % mData.length];
+            if (entry != null) {
+                return entry.item;
+            }
+        }
+        return null;
+    }
 }

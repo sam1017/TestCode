@@ -625,4 +625,23 @@
         <item quantity="one">%1$d আইটেম নির্বাচিত</item>
         <item quantity="other">%1$d আইটেম নির্বাচিত</item>
     </plurals>
+	
+	<string name="current_week_sunday">"রবিবার"</string>
+    <string name="current_week_monday">"সোমবার"</string>
+    <string name="current_week_tuesday">"মঙ্গলবার"</string>
+    <string name="current_week_wednesday">"বুধবার"</string>
+    <string name="current_week_thursday">"বৃহস্পতিবার"</string>
+    <string name="current_week_friday">"শুক্রবার"</string>
+    <string name="current_week_saturday">"শনিবার"</string>
+    <string name="last_week_sunday">গত রবিবার</string>
+    <string name="last_week_monday">গত সোমবার</string>
+    <string name="last_week_tuesday">গত মঙ্গলবার</string>
+    <string name="last_week_wednesday">গত বুধবার</string>
+    <string name="last_week_thursday">গত বৃহস্পতিবার</string>
+    <string name="last_week_friday">গত শুক্রবার</string>
+    <string name="last_week_saturday">গত শনিবার</string>
+	<string name="today">আজ</string>
+    <string name="yesterday">গতবার</string>
+
+    <string name="action_funny">প্রখ্যাত ব্যক্তি</string>
 </resources>

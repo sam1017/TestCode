@@ -47,12 +47,18 @@ public abstract class MediaObject {
     public static final int SUPPORT_CAMERA_SHORTCUT = 1 << 15;
     public static final int SUPPORT_MUTE = 1 << 16;
     public static final int SUPPORT_PRINT = 1 << 17;
+    
+    //Xiaoyh add for add select all icon at 2016/11/22
+    public static final int SUPPORT_SELECT_ALL = 1 << 18;
+    
     /// M: [FEATURE.ADD] @{
     public static final int SUPPORT_DC = 1 << 27;
     public static final int SUPPORT_PROTECTION_INFO = 1 << 28;
     public static final int SUPPORT_PQ = 1 << 29;
     public static final int SUPPORT_EXPORT = 1 << 30;
     /// @}
+    public static final int SUPPORT_FUNNY = 1 << 31;
+
     public static final int SUPPORT_ALL = 0xffffffff;
 
     // These are the bits returned from getMediaType():

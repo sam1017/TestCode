@@ -15,23 +15,99 @@
 -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <style name="GalleryTheme" parent="android:Theme.Material">
+
+    <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.12.13 -->
+    <!-- <style name="GalleryTheme" parent="android:Theme.Material.Light.LightStatusBar"> -->
+    <style name="GalleryTheme1" parent="android:Theme.Material.Light.LightStatusBar">
+    <!-- transsion end -->
+
         <!--//Xiaoyh@Itel-Mobile remove for remove the pre Galley window at 2016/09/20
         <item name="android:windowBackground">@android:color/black</item>-->
 
         <!--//Xiaoyh@Itel-Mobile add for remove the pre Galley window at 2016/09/20-->
-		  <item name="android:windowBackground">@null</item>
+          <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.12.01 -->
+          <!-- <item name="android:windowBackground">@null</item> -->
+          <item name="android:windowBackground">@android:color/white</item>
+          <!-- transsion end -->
 		  <item name="android:windowIsTranslucent">false</item>
 		  <item name="android:windowDisablePreview">true</item>
         <!--End-->
         
         <item name="@*android:panelBackground">@*android:drawable/menu_hardkey_panel_holo_dark</item>
         <item name="@*android:panelMenuListTheme">@*android:style/Theme.Material.CompactMenu</item>
+
+        <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.11.18 -->
+        <item name="android:actionBarTabStyle">@style/Widget.Holo.ActionBar.TabView.Ts</item>
+        <item name="android:actionBarTabTextStyle">@style/Widget.Holo.ActionBar.TabText.Ts</item>
+        <!-- transsion end -->
+
+        <!-- transsion begin, IB-02533, xieweiwei, add, 2016.11.19 -->
+        <item name="android:actionBarSize">@dimen/actionbar_height</item>
+        <!-- transsion begin, IB-02533, xieweiwei, delete, 2016.11.22 -->
+        <!--
+        <item name="android:height">@dimen/actionbar_height</item>
+        <item name="android:homeAsUpIndicator">@drawable/back</item>
+        <item name="android:gravity">bottom</item>
+        -->
+        <!-- transsion end -->
+        <!-- transsion end -->
+
+        <!-- transsion begin, IB-02533, xieweiwei, add, 2016.11.22 -->
+        <item name="android:actionModeCloseDrawable">@drawable/ic_back_normal</item>
+        <!-- transsion end -->
+
+        <!-- transsion begin, IB-02533, xieweiwei, add, 2016.11.22 -->
+        <item name="android:homeAsUpIndicator">@drawable/ic_back_normal</item>
+        <!-- transsion end -->
+
+        <!-- transsion begin, IB-02533, xieweiwei, add, 2016.11.28 -->
+        <item name="android:actionBarTabBarStyle">@style/Widget.Material.ActionBar.TabBar.Ts</item>
+        <item name="android:actionModeBackground">@drawable/actionbar_tab_bg</item>
+        <!-- transsion end -->
+
     </style>
+
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.13 -->
+    <style name="GalleryTheme" parent="android:Theme.Material.Light.NoActionBar.Fullscreen">
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:colorPrimaryDark">@android:color/white</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+    </style>
+    <!-- transsion end -->
+
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.11.18 -->
+    <style name="Widget.Holo.ActionBar.TabView.Ts" parent="android:Widget.Holo.ActionBar.TabView">
+        <item name="android:background">@drawable/actionbar_tab_bg</item>
+    </style>
+    <style name="Widget.Holo.ActionBar.TabText.Ts" parent="@android:style/Widget.Holo.ActionBar.TabText">
+        <item name="android:textColor">@color/actionbar_tab_textcolor</item>
+        <item name="android:textSize">@dimen/action_bar_text_size</item>
+    </style>
+    <!-- transsion end -->
+
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.11.28 -->
+    <style name="Widget.Material.ActionBar.TabBar.Ts" parent="android:Widget.Material.ActionBar.TabBar">
+        <item name="android:divider">@null</item>
+        <item name="android:showDividers">middle</item>
+        <item name="android:dividerPadding">0dip</item>
+    </style>
+    <!-- transsion end -->
+
     <style name="VideoPlayerTheme" parent="android:Theme.Material">
         <item name="android:windowBackground">@android:color/black</item>
     	<item name="*android:windowBackgroundFallback">@null</item>
     </style>
+
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.22 -->
+    <style name="Theme.TrimVideo" parent="android:Theme.Material">
+        <item name="android:windowBackground">@null</item>
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowDisablePreview">true</item>
+    </style>
+    <!-- transsion end -->
+
     <style name="Theme.GalleryBase" parent="android:Theme.Holo">
         <item name="listPreferredItemHeightSmall">48dp</item>
         <item name="switchStyle">@android:style/Widget.CompoundButton</item>
@@ -56,11 +132,13 @@
         <item name="android:windowNoDisplay">true</item>
     </style>
         
-    <style name="Theme.FilterShow" parent="Theme.Gallery">
+    <style name="Theme.FilterShow" parent="android:Theme.Material.Light.NoActionBar.Fullscreen">
         <!--//Xiaoyh@Itel-Mobile add for remove the pre Galley window at 2016/09/20-->
-		  <item name="android:windowBackground">@null</item>
-		  <item name="android:windowIsTranslucent">false</item>
-		  <item name="android:windowDisablePreview">true</item>
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:colorPrimaryDark">@android:color/white</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
         <!--End-->
 
         <!--//Xiaoyh@Itel-Mobile remove for remove the pre Galley window at 2016/09/20

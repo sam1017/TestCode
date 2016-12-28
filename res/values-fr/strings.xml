@@ -51,7 +51,7 @@
     <string name="camera_setas_wallpaper" msgid="797463183863414289">"Fond d\'écran"</string>
     <string name="delete" msgid="2839695998251824487">"Supprimer"</string>
   <plurals name="delete_selection">
-    <item quantity="one" msgid="6453379735401083732">"Supprimer élément sélectionné ?"</item>
+    <item quantity="one" msgid="6453379735401083732">"Supprimer l’élément sélectionné?"</item>
     <item quantity="other" msgid="5874316486520635333">"Suppr. éléments sélectionnés ?"</item>
   </plurals>
     <string name="confirm" msgid="8646870096527848520">"Confirmer"</string>
@@ -441,4 +441,23 @@
         <item quantity="one">%1$d élément sélectionné</item>
         <item quantity="other">%1$d éléments sélectionnés</item>
     </plurals>
+	
+	<string name="current_week_sunday">"dimanche"</string>
+    <string name="current_week_monday">"Lundi"</string>
+    <string name="current_week_tuesday">"Mardi"</string>
+    <string name="current_week_wednesday">"Mercredi"</string>
+    <string name="current_week_thursday">"Jeudi"</string>
+    <string name="current_week_friday">"Vendredi"</string>
+    <string name="current_week_saturday">"samedi"</string>
+    <string name="last_week_sunday">"Le dimanche"</string>
+    <string name="last_week_monday">"lundi dernier"</string>
+    <string name="last_week_tuesday">"Le mardi"</string>
+    <string name="last_week_wednesday">"mercredi dernier"</string>
+    <string name="last_week_thursday">"Jeudi dernier"</string>
+    <string name="last_week_friday">"Vendredi dernier"</string>
+    <string name="last_week_saturday">"Samedi dernier"</string>
+	<string name="today">"Aujourd'hui"</string>
+    <string name="yesterday">"Hier"</string>
+
+    <string name="action_funny">"Célébrité"</string>
 </resources>

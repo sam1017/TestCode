@@ -134,9 +134,10 @@
 
     <string-array name="camera_folders" translatable="false">
         <item>Pictures</item>
+        <item>Pictures/Screenshots</item>
+        <item>Download</item>
         <item>Movies</item>
         <item>DCIM/Camera</item>
-        <item>DCIM/Photo space</item>
     </string-array>
 
     <string-array name="other_folders" translatable="false">
@@ -170,5 +171,12 @@
         <item>@string/last_week_friday</item>
         <item>@string/last_week_saturday</item>
     </string-array>
+
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.09 -->
+    <string-array name="album_mode_array">
+        <item>@string/switch_photo_filmstrip</item>
+        <item>@string/switch_photo_grid</item>
+    </string-array>
+    <!-- transsion end -->
 
 </resources>

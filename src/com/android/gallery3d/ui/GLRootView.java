@@ -794,9 +794,9 @@ public class GLRootView extends GLSurfaceView
         int flags = 0;
         if (enabled) {
             flags = STATUS_BAR_HIDDEN;
-            if (ApiHelper.HAS_VIEW_SYSTEM_UI_FLAG_LAYOUT_STABLE) {
-                flags |= (SYSTEM_UI_FLAG_FULLSCREEN | SYSTEM_UI_FLAG_LAYOUT_STABLE);
-            }
+            //if (ApiHelper.HAS_VIEW_SYSTEM_UI_FLAG_LAYOUT_STABLE) {
+            //    flags |= (SYSTEM_UI_FLAG_FULLSCREEN | SYSTEM_UI_FLAG_LAYOUT_STABLE);
+            //}
         }
         setSystemUiVisibility(flags);
     }

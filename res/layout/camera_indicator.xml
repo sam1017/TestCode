@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+         Copyright (c) 2016-2036  TRANSSION HOLDINGS                               
+                                                                                   
+    PROPRIETARY RIGHTS of TRANSSION HOLDINGS are involved in the                   
+    subject matter of this material.  All manufacturing, reproduction, use,        
+    and sales rights pertaining to this subject matter are governed by the         
+    license agreement.  The recipient of this software implicitly accepts          
+    the terms of the license.                                                      
+                                                                                   
+    Description: For support camera indicator                                      
+    Author:      IB-02533                                                          
+    Version:     V1.0                                                              
+    Date:        2016.11.28                                                        
+    Modification:                                                                  
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/camera_indicator_layout_width"
+    android:layout_height="@dimen/camera_indicator_layout_width"
+    android:background="@android:color/transparent">
+
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.08 -->
+    <com.transsion.gallery3d.ui.RippleView
+        android:layout_width="@dimen/camera_indicator_layout_width"
+        android:layout_height="@dimen/camera_indicator_layout_width" >
+    <!-- transsion end -->
+
+    <ImageView 
+        android:id="@+id/camera_indicator"
+        android:src="@drawable/camera_click"
+        android:scaleType="center"
+        android:layout_gravity="center"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <!-- transsion begin, IB-02533, xieweiwei, delete, 2016.12.08 -->
+    <!-- android:background="@drawable/ripple_bg" -->
+    <!-- transsion end -->
+
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.08 -->
+    <ImageView
+        android:id="@+id/newfolder_indicator"
+        android:src="@drawable/newfolder_click"
+        android:scaleType="center"
+        android:layout_gravity="center"
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
+    <!-- transsion end -->
+
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.08 -->
+    </com.transsion.gallery3d.ui.RippleView>
+    <!-- transsion end -->
+
+</FrameLayout>

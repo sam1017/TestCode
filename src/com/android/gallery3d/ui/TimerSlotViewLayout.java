@@ -17,7 +17,7 @@ import com.android.gallery3d.data.MixAlbum.Range;
 public class TimerSlotViewLayout {
 
     private static final boolean WIDE = false;
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 	private static final String TAG = "TimerSlotViewLayout";
 	private static final int INDEX_NONE = -1;
 	private AbstractGalleryActivity mActivity;
@@ -396,6 +396,7 @@ public class TimerSlotViewLayout {
             mContentLength = count * majorUnitSize + (count - 1) * mSlotGap;
             mContentLength += mSlotGap + mSpec.topPadding;
         }
+        mContentLength += 114;
 
         padding[1] = mSpec.topPadding;
     }

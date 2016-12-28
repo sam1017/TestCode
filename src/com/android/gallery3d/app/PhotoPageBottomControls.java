@@ -87,6 +87,14 @@ public class PhotoPageBottomControls implements OnClickListener {
         mDelegate.refreshBottomControlsWhenReady();
     }
 
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.18
+    public View getMoreButton() {
+        // the last button is the menu button named "more", we need it to anchor popup window
+        View child = mContainer.getChildAt(mContainer.getChildCount() - 1);
+        return child;
+    }
+    // transsion end
+
     public void hide() {
         mContainer.clearAnimation();
         mContainerAnimOut.reset();

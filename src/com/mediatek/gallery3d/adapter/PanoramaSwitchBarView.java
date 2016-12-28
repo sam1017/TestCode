@@ -49,7 +49,7 @@ public class PanoramaSwitchBarView extends GLView implements SwitchBarView {
         // initialize top gap
         ActionBar actionbar = activity.getActionBar();
         if (actionbar != null && actionbar.getHeight() != 0) {
-            mSwitchBarTopGap = actionbar.getHeight();
+            mSwitchBarTopGap = actionbar.getHeight() + 10;
             MtkLog.i(TAG, "<new> from actionbar, mSwitchBarTopGap = " + mSwitchBarTopGap);
         } else {
             TypedValue tv = new TypedValue();

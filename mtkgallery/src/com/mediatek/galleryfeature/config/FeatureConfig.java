@@ -35,13 +35,13 @@ public class FeatureConfig {
     // Whether resource consuming MTK new features should be enabled
     public static final boolean SUPPORT_HEAVY_FEATURE = (CPU_CORES_NUM >= CPU_4_CORES);
 
-    public static final boolean SUPPORT_PANORAMA3D = true && SUPPORT_HEAVY_FEATURE;
+    public static final boolean SUPPORT_PANORAMA3D = false && SUPPORT_HEAVY_FEATURE;
 
     public static final boolean SUPPORT_CONSHOTS_IMAGES = true && SUPPORT_HEAVY_FEATURE;
 
-    public static final boolean SUPPORT_VIDEO_THUMBNAIL_PLAY = SystemProperties.get(
-            THUMBNAIL_PLAY_PROPERTY).equals("1")
-            && SUPPORT_HEAVY_FEATURE;
+    public static final boolean SUPPORT_VIDEO_THUMBNAIL_PLAY = false; //SystemProperties.get(
+    //        THUMBNAIL_PLAY_PROPERTY).equals("1")
+    //        && SUPPORT_HEAVY_FEATURE;
 
     public static final boolean SUPPORT_FANCY_HOMEPAGE = false;//true
 	/*--modify by liangchangwei 2016-9-9--*/

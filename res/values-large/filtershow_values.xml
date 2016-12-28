@@ -19,7 +19,10 @@
     <bool name="only_use_portrait">false</bool>
 
     <!-- Category Panel Height -->
-    <dimen name="category_panel_height">94dip</dimen>
+    <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.12.26 -->
+    <!-- <dimen name="category_panel_height">94dip</dimen> -->
+    <dimen name="category_panel_height">72dip</dimen>
+    <!-- transsion end -->
 
     <!-- Category Panel Icon Size -->
     <dimen name="category_panel_icon_size">72dip</dimen>

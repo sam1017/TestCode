@@ -141,6 +141,19 @@ public class PermissionHelper {
         return true;
     }
 
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.17
+    public static boolean checkForFilterShowVisitGoogleProvider(Activity activity) {
+        String permisson = "com.google.android.apps.photos.contentprovider.MediaContentProvider";
+        if (ContextCompat.checkSelfPermission(activity, permisson)
+                != PackageManager.PERMISSION_GRANTED) {
+            MtkLog.i(TAG, "<checkForFilterShow> permission not granted, finish");
+            return false;
+        }
+        MtkLog.i(TAG, "<checkForFilterShow> all permissions are granted");
+        return true;
+    }
+    // transsion end
+
     /** Check if all permissions in String[] are granted.
      * @param permissions A group of permissions
      * @param grantResults The granted status of permissions

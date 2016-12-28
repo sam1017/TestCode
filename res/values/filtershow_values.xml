@@ -22,10 +22,13 @@
     <dimen name="state_panel_text_size">16dip</dimen>
 
     <!-- Category Panel Height -->
-    <dimen name="category_panel_height">86dip</dimen>
+    <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.12.27 -->
+    <!-- <dimen name="category_panel_height">64dip</dimen> -->
+    <dimen name="category_panel_height">72dip</dimen>
+    <!-- transsion end -->
 
     <!-- Category Panel Icon Size -->
-    <dimen name="category_panel_icon_size">64dip</dimen>
+    <dimen name="category_panel_icon_size">52dip</dimen>
 
     <!-- Category Panel Text Size -->
     <dimen name="category_panel_text_size">13dip</dimen>

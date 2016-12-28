@@ -86,7 +86,10 @@ public class ImageShow extends View implements OnGestureListener,
 
     private NinePatchDrawable mShadow = null;
     private Rect mShadowBounds = new Rect();
-    private int mShadowMargin = 15; // not scaled, fixed in the asset
+    // transsion begin, IB-02533, xieweiwei, modify, 2016.12.27
+    //private int mShadowMargin = 15; // not scaled, fixed in the asset
+    private int mShadowMargin = 0; // not scaled, fixed in the asset
+    // transsion end
     private boolean mShadowDrawn = false;
 
     private Point mTouchDown = new Point();

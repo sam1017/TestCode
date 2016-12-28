@@ -56,11 +56,23 @@ public class IconView extends View {
     private String mText;
     private boolean mUseOnlyDrawable = false;
 
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.26
+    private boolean mIsSelected = false;
+    private int mTextSelectedColor;
+    private int mTextUnSelectedColor;
+    private int mTextHeight;
+    // transsion end
+
     public IconView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setup(context);
         int bitmapRsc = attrs.getAttributeResourceValue(
                 "http://schemas.android.com/apk/res/android", "src", 0);
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.26
+        mIsSelected = false;
+        // transsion end
+
         Resources res = context.getResources();
         Bitmap bitmap = BitmapFactory.decodeStream(res.openRawResource(bitmapRsc));
         setBitmap(bitmap);
@@ -78,6 +90,13 @@ public class IconView extends View {
         mBackgroundColor = res.getColor(R.color.filtershow_categoryview_background);
         mMargin = res.getDimensionPixelOffset(R.dimen.category_panel_margin);
         mTextSize = res.getDimensionPixelSize(R.dimen.category_panel_text_size);
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.26
+        mTextSelectedColor = res.getColor(R.color.filtershow_text_selected_color);
+        mTextUnSelectedColor = res.getColor(R.color.filtershow_text_unselected_color);
+        mTextHeight = res.getDimensionPixelSize(R.dimen.filtershow_bottom_text_height);
+        // transsion end
+
     }
 
     protected void computeTextPosition(String text) {
@@ -104,6 +123,13 @@ public class IconView extends View {
         if (text == null) {
             return;
         }
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.26
+        if ("".equals(text)) {
+            return;
+        }
+        // transsion end
+
         float textWidth = mPaint.measureText(text);
         int x = (int) (canvas.getWidth() - textWidth - 2*mMargin);
         if (needsCenterText()) {
@@ -132,7 +158,25 @@ public class IconView extends View {
             // transsion end
 
         }
-        int y = canvas.getHeight() - 2*mMargin;
+        // transsion begin, IB-02533, xieweiwei, modify, 2016.12.26
+        //int y = canvas.getHeight() - 2*mMargin;
+        int y = canvas.getHeight() - 2 * mMargin + 10;
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.26
+        int color = mPaint.getColor();
+        Paint.Style style = mPaint.getStyle();
+        mPaint.setStyle(Paint.Style.FILL);
+        if (mIsSelected) {
+            mPaint.setColor(mTextSelectedColor);
+        } else {
+            mPaint.setColor(mTextUnSelectedColor);
+        }
+        canvas.drawRect(mMargin / 2, canvas.getHeight() - mTextHeight, canvas.getWidth() - mMargin / 2, canvas.getHeight(), mPaint);
+        mPaint.setColor(color);
+        mPaint.setStyle(style);
+        // transsion end
+
         canvas.drawText(text, x, y, mPaint);
     }
 
@@ -262,4 +306,10 @@ public class IconView extends View {
         }
         drawOutlinedText(canvas, getText());
     }
+
+    // transsion begin, IB-02533, xieweiwei, add,  2016.12.26
+    protected void setIsSelected(boolean selected) {
+        mIsSelected = selected;
+    }
+    // transsion end
 }

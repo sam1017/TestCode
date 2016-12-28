@@ -441,4 +441,22 @@
         <item quantity="one">%1$d elemento seleccionado</item>
         <item quantity="other">%1$d elementos seleccionados</item>
     </plurals>
+    <string name="current_week_sunday">"Domingo"</string>
+    <string name="current_week_monday">"Lunes"</string>
+    <string name="current_week_tuesday">"Martes"</string>
+    <string name="current_week_wednesday">"Miércoles"</string>
+    <string name="current_week_thursday">"Jueves"</string>
+    <string name="current_week_friday">"Viernes"</string>
+    <string name="current_week_saturday">"Sábado"</string>
+    <string name="last_week_sunday">"El domingo pasado"</string>
+    <string name="last_week_monday">"El lunes pasado"</string>
+    <string name="last_week_tuesday">"El martes pasado"</string>
+    <string name="last_week_wednesday">"El miércoles pasado"</string>
+    <string name="last_week_thursday">"El jueves pasado"</string>
+    <string name="last_week_friday">"El viernes pasado"</string>
+    <string name="last_week_saturday">"El sábado pasado"</string>
+	<string name="today">"Hoy"</string>
+    <string name="yesterday">Ayer</string>
+
+    <string name="action_funny">Celebridad</string>
 </resources>

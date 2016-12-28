@@ -20,7 +20,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal">
-
+      
+      <!--//Xiaoyh Modify for remove original ActionModeHandler at 2016/11/21-->
+      <TextView android:id="@+id/selection_txt"
+				android:textColor="@android:color/black"
+                android:textSize="18dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"/>
+    <!--
     <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="wrap_content"
             android:layout_height="match_parent">
@@ -28,6 +36,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:src="@drawable/dropdown_ic_arrow_normal_holo_dark" />
+       
         <Button android:id="@+id/selection_menu"
                 style="?android:attr/actionButtonStyle"
                 android:divider="?android:attr/listDividerAlertDialog"
@@ -38,7 +47,7 @@
                 android:paddingRight="25dip"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent" />
-    </FrameLayout>
+    </FrameLayout> -->
     <!-- <ImageView
         android:layout_width="wrap_content"
         android:layout_height="match_parent"

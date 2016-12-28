@@ -450,7 +450,7 @@ public class MovieActivity extends Activity implements LoaderListener , CreateBe
             if (mTreatUpAsBack) {
                 finish();
             } else {
-                startActivity(new Intent(this, GalleryActivity.class));
+                //startActivity(new Intent(this, GalleryActivity.class));
                 finish();
             }
             return true;
@@ -955,6 +955,7 @@ public class MovieActivity extends Activity implements LoaderListener , CreateBe
         WindowManager.LayoutParams winParams = win.getAttributes();
         winParams.buttonBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_OFF;
         winParams.flags |= WindowManager.LayoutParams.FLAG_FULLSCREEN;
+        winParams.flags |= WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED;
         win.setAttributes(winParams);
         win.setFormat(PixelFormat.TRANSLUCENT);
 

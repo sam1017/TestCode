@@ -441,4 +441,23 @@
         <item quantity="one">%1$d آیتم انتخاب شد</item>
         <item quantity="other">%1$d آیتم انتخاب شد</item>
     </plurals>
+	
+    <string name="current_week_sunday">"یکشنبه"</string>
+    <string name="current_week_monday">"دوشنبه"</string>
+    <string name="current_week_tuesday">"سهشنبه"</string>
+    <string name="current_week_wednesday">"چهار شنبه"</string>
+    <string name="current_week_thursday">"پنج شنبه"</string>
+    <string name="current_week_friday">"جمعه"</string>
+    <string name="current_week_saturday">"شنبه"</string>
+    <string name="last_week_sunday">"یکشنبه گذشته"</string>
+    <string name="last_week_monday">"دوشنبه گذشته"</string>
+    <string name="last_week_tuesday">"سه‌شنبه گذشته"</string>
+    <string name="last_week_wednesday">"چهارشنبه گذشته"</string>
+    <string name="last_week_thursday">"پنجشنبه گذشته"</string>
+    <string name="last_week_friday">"جمعه گذشته"</string>
+    <string name="last_week_saturday">"شنبه گذشته"</string>
+	<string name="today">امروز</string>
+    <string name="yesterday">ديروز</string>
+
+    <string name="action_funny">افراد مشهور</string>
 </resources>

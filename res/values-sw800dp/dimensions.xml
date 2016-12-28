@@ -16,5 +16,8 @@
 <resources>
     <!--  configuration for filtershow UI -->
     <dimen name="thumbnail_size">128dip</dimen>
-    <dimen name="thumbnail_margin">3dip</dimen>
+    <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.12.27 -->
+    <!-- <dimen name="thumbnail_margin">3dip</dimen> -->
+    <dimen name="thumbnail_margin">1dip</dimen>
+    <!-- transsion end -->
 </resources>

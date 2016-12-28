@@ -53,6 +53,11 @@
             android:title="@string/edit"
             android:showAsAction="never"
             android:visible="false" />
+    <item android:id="@+id/photopage_funny"
+            android:title="@string/action_funny"
+            android:showAsAction="never"
+            android:visible="false" />
+    
     <!-- M: [FEATURE.ADD] @{-->
     <item android:id="@+id/m_action_image_dc"
           android:title="@string/m_image_dc"

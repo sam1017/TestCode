@@ -76,6 +76,10 @@ import com.mediatek.galleryframework.base.MediaData;
 import com.mediatek.galleryframework.util.GalleryPluginUtils;
 /// @}
 
+// transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+import com.transsion.gallery3d.ui.FloatingActionBar;
+// transsion end
+
 /// M: [BUG.MODIFY] leave selection mode when plug out sdcard @{
 /*
 public class AlbumPage extends ActivityState implements GalleryActionBar.ClusterRunner,
@@ -117,6 +121,7 @@ public class AlbumPage extends ActivityState implements
     protected SelectionManager mSelectionManager;
 
     private boolean mGetContent;
+    private boolean mGetMultiImage;
     private boolean mShowClusterMenu;
 
     private ActionModeHandler mActionModeHandler;
@@ -139,6 +144,21 @@ public class AlbumPage extends ActivityState implements
 
     private Handler mHandler;
     private static final int MSG_PICK_PHOTO = 0;
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.09
+    private static final int MSG_ON_BACK_PRESSS = 1;
+    private static final int MSG_GO_TO_FILMSTRIP = 2;
+    // transsion end
+
+    // transsion begin, IB-02533, xieweiwei, delete, 2016.12.03
+    //// transsion begin, IB-02533, xieweiwei, add, 2016.12.02
+    //private boolean mGetReadyForPhotoPage = false;
+    //// transsion end
+    // transsion end
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.12
+    public FloatingActionBar mFloatingActionBar;
+    // transsion end
 
     private PhotoFallbackEffect mResumeEffect;
     private PhotoFallbackEffect.PositionProvider mPositionProvider =
@@ -176,7 +196,11 @@ public class AlbumPage extends ActivityState implements
         protected void onLayout(
                 boolean changed, int left, int top, int right, int bottom) {
 
-            int slotViewTop = mActivity.getGalleryActionBar().getHeight();
+            int slotViewTop = 0;
+            if(mActivity != null){
+                slotViewTop = mActivity.getResources().getDimensionPixelSize(R.dimen.albumpage_mrootview_top);
+            }
+
             int slotViewBottom = bottom - top;
             int slotViewRight = right - left;
 
@@ -195,6 +219,13 @@ public class AlbumPage extends ActivityState implements
 
         @Override
         protected void render(GLCanvas canvas) {
+            // transsion begin, IB-02533, xieweiwei, delete, 2016.12.03
+            //// transsion begin, IB-02533, xieweiwei, add, 2016.12.02
+            //if (mGetReadyForPhotoPage) {
+            //    return;
+            //}
+            //// transsion end
+            // transsion end
             canvas.save(GLCanvas.SAVE_FLAG_MATRIX);
             canvas.multiplyMatrix(mMatrix, 0);
             super.render(canvas);
@@ -398,6 +429,11 @@ public class AlbumPage extends ActivityState implements
             if (startInFilmstrip) {
                 mActivity.getStateManager().switchState(this, FilmstripPage.class, data);
             } else {
+                // transsion begin, IB-02533, xieweiwei, delete, 2016.12.03
+                //// transsion begin, IB-02533, xieweiwei, add, 2016.12.02
+                //mGetReadyForPhotoPage = true;
+                //// transsion end
+                // transsion end
                 mActivity.getStateManager().startStateForResult(
                             SinglePhotoPage.class, REQUEST_PHOTO, data);
             }
@@ -423,6 +459,9 @@ public class AlbumPage extends ActivityState implements
             if (mData.getParcelable(MediaStore.EXTRA_OUTPUT) == null) {
                 intent.putExtra(CropExtras.KEY_RETURN_DATA, true);
             }
+            // transsion begin, IB-02533, xieweiwei, add, 2016.11.26
+            intent.setClassName("com.android.gallery3d", "com.android.gallery3d.filtershow.crop.CropActivity");
+            // transsion end
             /// M: [DEBUG.ADD] @{
             Log.d(TAG, "<onGetContent> start CropActivity for extra crop, uri: " + uri);
             /// @}
@@ -490,6 +529,7 @@ public class AlbumPage extends ActivityState implements
         initializeViews();
         initializeData(data);
         mGetContent = data.getBoolean(GalleryActivity.KEY_GET_CONTENT, false);
+        mGetMultiImage = data.getBoolean(GalleryActivity.KEY_GET_MULTIIMAGE, false);
         mShowClusterMenu = data.getBoolean(KEY_SHOW_CLUSTER_MENU, false);
         mDetailsSource = new MyDetailsSource();
         Context context = mActivity.getAndroidContext();
@@ -498,6 +538,10 @@ public class AlbumPage extends ActivityState implements
             mSelectionManager.selectAll();
         }
 
+        if(mGetMultiImage){
+            mSelectionManager.setAutoLeaveSelectionMode(false);
+            mSelectionManager.toggle(null);
+        }
         /// M: [FEATURE.MODIFY] Container @{
         /*mLaunchedFromPhotoPage =
          mActivity.getStateManager().hasStateClass(FilmstripPage.class);*/
@@ -521,6 +565,20 @@ public class AlbumPage extends ActivityState implements
                         pickPhoto(message.arg1);
                         break;
                     }
+                    // transsion begin, IB-02533, xieweiwei, add, 2016.12.09
+                    case MSG_ON_BACK_PRESSS:
+                        mActivity.getGLRoot().lockRenderThread();
+                        onUpPressed();
+                        mActivity.getGLRoot().unlockRenderThread();
+                        break;
+                    // transsion end
+                    // transsion begin, IB-02533, xieweiwei, add, 2016.12.09
+                    case MSG_GO_TO_FILMSTRIP:
+                        mActivity.getGLRoot().lockRenderThread();
+                        switchToFilmstrip();
+                        mActivity.getGLRoot().unlockRenderThread();
+                        break;
+                    // transsion end
                     default:
                         throw new AssertionError(message.what);
                 }
@@ -531,13 +589,54 @@ public class AlbumPage extends ActivityState implements
         mActionModeHandler = GalleryPluginUtils.getGalleryPickerPlugin()
                 .onCreate(mActivity, data, mActionModeHandler, mSelectionManager);
         /// @}
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.09
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.15
+        //getFloatingActionBar().initCluster(mClusterListener);
+        // transsion end
+        // transsion end
+
     }
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.12
+    public FloatingActionBar.ClusterButtonClickListener mClusterListener = new FloatingActionBar.ClusterButtonClickListener() {
+            public boolean onClusterBack() {
+                mHandler.obtainMessage(MSG_ON_BACK_PRESSS).sendToTarget();
+                return true;
+            }
+            public void onClusterModeClick(int mode) {
+                if (mode == FloatingActionBar.ALBUM_FILMSTRIP_MODE_SELECTED) {
+                    mHandler.obtainMessage(MSG_GO_TO_FILMSTRIP).sendToTarget();
+                }
+            }
+    };
+    // transsion end
 
     @Override
     protected void onResume() {
         super.onResume();
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.14
+        if (mActivity.getActionBar() == null) {
+            onCreateActionBarHelp();
+        }
+        // transsion end
+
         mIsActive = true;
 
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.13
+        showStateBar();
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+        if (mActivity.getActionBar() == null) {
+        // transsion begin
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.15
+        getFloatingActionBar().initCluster(mClusterListener);
+        // transsion end
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+        }
+        // transsion begin
         mResumeEffect = mActivity.getTransitionStore().get(KEY_RESUME_ANIMATION);
         if (mResumeEffect != null) {
             mAlbumView.setSlotFilter(mResumeEffect);
@@ -546,6 +645,10 @@ public class AlbumPage extends ActivityState implements
         }
 
         setContentPane(mRootPane);
+        hideCameraView();
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.14
+        hideNewFolderView();
+        // transsion end
 
         /// M: [BUG.MARK] put these code in onCreateActionBar @{
         /*
@@ -559,6 +662,18 @@ public class AlbumPage extends ActivityState implements
         */
         /// @}
 
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.09
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.15
+        //getFloatingActionBar().setToGridCluster(mClusterListener);
+        // transsion end
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.15
+        //getFloatingActionBar().showClusterActionBar();
+        // transsion end
+        // transsion end
+
         // Set the reload bit here to prevent it exit this page in clearLoadingBit().
         setLoadingBit(BIT_LOADING_RELOAD);
         mLoadingFailed = false;
@@ -567,9 +682,28 @@ public class AlbumPage extends ActivityState implements
             mNeedUpdateSelection = true;
             // set mRestoreSelectionDone as false if we need to retore selection
             mRestoreSelectionDone = false;
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            if (mActivity.getActionBar() == null) {
+            // transsion begin
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.15
+            getFloatingActionBar().showSelectionModeActionBar();
+            // transsion end
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            }
+            // transsion begin
         } else {
             // set mRestoreSelectionDone as true there is no need to retore selection
             mRestoreSelectionDone = true;
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            if (mActivity.getActionBar() == null) {
+            // transsion begin
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.15
+            getFloatingActionBar().showClusterActionBar();
+            // transsion end
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            }
+            // transsion begin
         }
         /// @}
         mAlbumDataAdapter.resume();
@@ -589,6 +723,11 @@ public class AlbumPage extends ActivityState implements
         /// M: [FEATURE.ADD] Gallery picker plugin @{
         GalleryPluginUtils.getGalleryPickerPlugin().onResume(mSelectionManager);
         /// @}
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.03
+        //// transsion begin, IB-02533, xieweiwei, add, 2016.12.02
+        //mGetReadyForPhotoPage = false;
+        //// transsion end
+        // transsion end
     }
 
     @Override
@@ -689,7 +828,10 @@ public class AlbumPage extends ActivityState implements
                 AlbumPage.this.onLongTap(slotIndex);
             }
         });
-        mActionModeHandler = new ActionModeHandler(mActivity, mSelectionManager);
+        // transsion begin, IB-02533, xieweiwei, modify, 2016.11.21
+        //mActionModeHandler = new ActionModeHandler(mActivity, mSelectionManager);
+        mActionModeHandler = new ActionModeHandler(mActivity, mSelectionManager, this);
+        // transsion end
         mActionModeHandler.setActionModeListener(new ActionModeListener() {
             @Override
             public boolean onActionItemClicked(MenuItem item) {
@@ -738,6 +880,21 @@ public class AlbumPage extends ActivityState implements
         mSlotView.invalidate();
     }
 
+    // transsion begein, IB-02533, xieweiwei, add, 2016.12.12
+    public boolean onCreateActionBarHelp() {
+        if (mGetContent) {
+            int typeBits = mData.getInt(GalleryActivity.KEY_TYPE_BITS,
+                    DataManager.INCLUDE_IMAGE);
+            getFloatingActionBar().setClusterTitle(mActivity.getResources().getString(GalleryUtils.getSelectionModePrompt(typeBits)));
+            getFloatingActionBar().setClusterSpinnerVisible(false);
+        } else {
+            getFloatingActionBar().setClusterTitle(mMediaSet.getName());
+        }
+        getFloatingActionBar().showClusterActionBar();
+        return true;
+    }
+    // transsion end
+
     @Override
     protected boolean onCreateActionBar(Menu menu) {
         GalleryActionBar actionBar = mActivity.getGalleryActionBar();
@@ -754,12 +911,32 @@ public class AlbumPage extends ActivityState implements
             int typeBits = mData.getInt(GalleryActivity.KEY_TYPE_BITS,
                     DataManager.INCLUDE_IMAGE);
             actionBar.setTitle(GalleryUtils.getSelectionModePrompt(typeBits));
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            if (mActivity.getActionBar() == null) {
+            // transsion begin
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+            getFloatingActionBar().setClusterTitle(GalleryUtils.getSelectionModePrompt(typeBits));
+            // transsion end
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            }
+            // transsion begin
+            actionBar.setDisplayHomeAsUpEnabled(false);
         } else {
             inflator.inflate(R.menu.album, menu);
             /// M: [BUG.ADD] @{
             Log.d(TAG, "<onCreateActionBar> setTitle:" + mMediaSet.getName());
             /// @}
             actionBar.setTitle(mMediaSet.getName());
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            if (mActivity.getActionBar() == null) {
+            // transsion begin
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+            getFloatingActionBar().setClusterTitle(mMediaSet.getName());
+            // transsion end
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            }
+            // transsion begin
+
             /// M: [BUG.ADD] @{
             // put code related with ActionBar here, not in onResume
             // After gallery was killed when in AlbumPage, when restart,
@@ -771,6 +948,13 @@ public class AlbumPage extends ActivityState implements
             FilterUtils.setupMenuItems(actionBar, mMediaSetPath, true);
 
             menu.findItem(R.id.action_group_by).setVisible(mShowClusterMenu);
+
+            // transsion begin, IB-02533 ,xieweiwei, add, 2016.11.22
+            menu.findItem(R.id.action_group_by).setVisible(false);
+            menu.findItem(R.id.action_slideshow).setVisible(false);
+            menu.findItem(R.id.action_select).setVisible(false);
+            // transsion end
+
             //remove by liangchangwei 2016-9-21 --fix bug 3022	
             menu.findItem(R.id.action_camera).setVisible(false);
             //menu.findItem(R.id.action_camera).setVisible(
@@ -783,7 +967,15 @@ public class AlbumPage extends ActivityState implements
         /// M: [FEATURE.ADD] Gallery picker plugin @{
         GalleryPluginUtils.getGalleryPickerPlugin().onCreateActionBar(menu);
         /// @}
-
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+        if (mActivity.getActionBar() == null) {
+        // transsion begin
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+        getFloatingActionBar().showClusterActionBar();
+        // transsion end
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+        }
+        // transsion begin
         return true;
     }
 
@@ -880,6 +1072,12 @@ public class AlbumPage extends ActivityState implements
                 mSlotView.startRisingAnimation();
                 break;
             }
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.20
+            case ActionModeHandler.RESULT_MOVE_IMAGE: {
+                mActionModeHandler.onStateResult(request, result, data);
+                break;
+            // transsion end
+            }
         }
     }
 
@@ -887,11 +1085,15 @@ public class AlbumPage extends ActivityState implements
     public void onSelectionModeChange(int mode) {
         switch (mode) {
             case SelectionManager.ENTER_SELECTION_MODE: {
+                if(mGetMultiImage){
+                    mActionModeHandler.setGetMultiImage(mGetMultiImage);
+                }
                 mActionModeHandler.startActionMode();
                 performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
                 break;
             }
             case SelectionManager.LEAVE_SELECTION_MODE: {
+                mActionModeHandler.setGetMultiImage(false);
                 mActionModeHandler.finishActionMode();
                 mRootPane.invalidate();
                 break;
@@ -1018,10 +1220,46 @@ public class AlbumPage extends ActivityState implements
                 Log.d(TAG, "<onLoadingFinished> setTitle:" + title);
                 actionBar.setTitle(title);
                 actionBar.notifyDataSetChanged();
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+                if (mActivity.getActionBar() == null) {
+                // transsion begin
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+                getFloatingActionBar().setClusterTitle(title);
+                // transsion end
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+                }
+                // transsion begin
             }
             /// @}
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+            else {
+                if (!inSelectionMode) {
+                    String title = mMediaSet.getName();
+                    // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+                    if (mActivity.getActionBar() == null) {
+                    // transsion begin
+                    getFloatingActionBar().setClusterTitle(title);
+                    // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+                    }
+                    // transsion begin
+                }
+            }
+            // transsion end
         }
     }
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.12
+    public FloatingActionBar getFloatingActionBar() {
+        // transsion begin, IB-02533, xieweiwei, modify, 2016.12.15
+        //if (mFloatingActionBar == null) {
+        //    mFloatingActionBar = new FloatingActionBar(mActivity, true);
+        //}
+        //return mFloatingActionBar;
+        return mActivity.getFloatingActionBar();
+        // transsion end
+    }
+    // transsion end
 
     private class MyDetailsSource implements DetailsHelper.DetailsSource {
         private int mIndex;

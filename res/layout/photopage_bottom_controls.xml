@@ -1,55 +1,155 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<!-- transsion begin, IB-02533, xieweiwei, modify,2016.11.21 -->
+<!-- <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/photopage_bottom_controls"
-        android:padding="10dp"
         android:layout_width="match_parent"
-        android:layout_height="48dp"
+        android:layout_height="@dimen/bottom_buttons_height"
         android:background = "#ececec"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
+        android:orientation="horizontal"
+        android:visibility="gone"> -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/photopage_bottom_controls"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/bottom_buttons_height"
+        android:background = "@drawable/custom_bottom_bg"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:orientation="horizontal"
         android:visibility="gone">
 
+        <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.11.30 -->
+        <!-- android:background = "#f7f7f7" -->
+        <!-- android:background = "@drawable/custom_bottom_bg" -->
+        <!-- transsion end -->
+
+<!-- transsion end -->
+
+        <!-- transsion begin, iB-02533, xieweiwei, modify, 2016.11.18 -->
+        <!-- android:layout_height="48dp" -->
+        <!-- android:layout_height="@dimen/bottom_buttons_height" -->
+        <!-- transsion end -->
+
         <ImageButton
                 android:id="@+id/photopage_bottom_control_share"
-                android:background="@drawable/photopage_bottom_button_share_background"
-                android:layout_width="wrap_content"
+                android:src="@drawable/photopage_bottom_button_share_background"
+                android:background="@drawable/ripple_bg"
+                android:layout_width="match_parent"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
                 android:layout_alignParentLeft="true"
-                android:layout_marginLeft = "20dp"
                 android:layout_alignParentBottom="true"
                 android:visibility="gone"/>
 
-         <ImageButton
-                android:id="@+id/photopage_bottom_control_setpicture_as"
-                android:background="@drawable/photopage_bottom_button_setpicture_background"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf = "@id/photopage_bottom_control_share"
-                android:layout_alignParentBottom="true"
-                android:layout_marginLeft = "50dp"
-                android:visibility="gone"/>
+        <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.11.19 -->
+        <!-- android:background="@drawable/photopage_bottom_button_share_background" -->
+        <!-- android:src="@drawable/photopage_bottom_button_share_background"
+             android:background="@drawable/ripple_bg" -->
+        <!-- transsion end -->
 
-        <ImageButton
-                android:id="@+id/photopage_bottom_control_delete"
-                android:background="@drawable/photopage_bottom_button_delete_background"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentRight="true"
-                android:layout_marginRight = "20dp"
-                android:layout_alignParentBottom="true"
-                android:visibility="gone"/>
+        <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.11.21 -->
+        <!-- android:layout_width="wrap_content" -->
+        <!-- android:layout_width="match_parent"
+             android:layout_weight="1" -->
+        <!-- transsion end -->
 
         <ImageButton
                 android:id="@+id/photopage_bottom_control_edit"
-                android:background="@drawable/photopage_bottom_button_edit_background"
-                android:layout_width="wrap_content"
+                android:src="@drawable/photopage_bottom_button_edit_background"
+                android:background="@drawable/ripple_bg"
+                android:layout_width="match_parent"
+                android:layout_weight="1"
                 android:layout_height="wrap_content"
-                android:layout_toLeftOf = "@id/photopage_bottom_control_delete"
+                android:layout_toRightOf = "@id/photopage_bottom_control_share"
                 android:layout_alignParentBottom="true"
-                android:layout_marginRight = "50dp"
                 android:visibility="gone"/>
+
+        <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.11.19 -->
+        <!-- android:background="@drawable/photopage_bottom_button_edit_background" -->
+        <!-- android:src="@drawable/photopage_bottom_button_edit_background"
+             android:background="@drawable/ripple_bg" -->
+        <!-- transsion end -->
+
+        <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.11.21 -->
+        <!-- android:layout_width="wrap_content" -->
+        <!-- android:layout_width="match_parent"
+             android:layout_weight="1" -->
+        <!-- transsion end -->
+
+        <ImageButton
+                android:id="@+id/photopage_bottom_control_makeup"
+                android:src="@drawable/photopage_bottom_button_makeup_background"
+                android:background="@drawable/ripple_bg"
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf = "@id/photopage_bottom_control_edit"
+                android:layout_alignParentBottom="true"
+                android:visibility="gone"/>
+
+        <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.11.19 -->
+        <!-- android:background="@drawable/photopage_bottom_button_makeup_background" -->
+        <!-- android:src="@drawable/photopage_bottom_button_makeup_background"
+             android:background="@drawable/ripple_bg" -->
+        <!-- transsion end -->
+
+        <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.11.21 -->
+        <!-- android:layout_width="wrap_content" -->
+        <!-- android:layout_width="match_parent"
+             android:layout_weight="1" -->
+        <!-- transsion end -->
+         
+        <ImageButton
+                android:id="@+id/photopage_bottom_control_delete"
+                android:src="@drawable/photopage_bottom_button_delete_background"
+                android:background="@drawable/ripple_bg"
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf = "@id/photopage_bottom_control_makeup"
+                android:layout_alignParentBottom="true"
+                android:visibility="gone"/>
+
+        <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.11.19 -->
+        <!-- android:background="@drawable/photopage_bottom_button_delete_background" -->
+        <!-- android:src="@drawable/photopage_bottom_button_delete_background"
+             android:background="@drawable/ripple_bg" -->
+        <!-- transsion end -->
+
+        <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.11.21 -->
+        <!-- android:layout_width="wrap_content" -->
+        <!-- android:layout_width="match_parent"
+             android:layout_weight="1" -->
+        <!-- transsion end -->
+        
+        <ImageButton
+                android:id="@+id/photopage_bottom_control_more"
+                android:src="@drawable/photopage_bottom_button_more_background"
+                android:background="@drawable/ripple_bg"
+                android:layout_width="match_parent"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf = "@id/photopage_bottom_control_delete"
+                android:layout_alignParentBottom="true"
+                android:visibility="gone"/>
+
+        <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.11.19 -->
+        <!-- android:background="@drawable/photopage_bottom_button_more_background" -->
+        <!-- android:src="@drawable/photopage_bottom_button_more_background"
+             android:background="@drawable/ripple_bg" -->
+        <!-- transsion end -->
+
+        <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.11.21 -->
+        <!-- android:layout_width="wrap_content" -->
+        <!-- android:layout_width="match_parent"
+             android:layout_weight="1" -->
+        <!-- transsion end -->
 
          <!-- added for image refocus. -->
 
-</RelativeLayout>
+<!-- transsion begin, IB-02533, xieweiwei, modify,2016.11.21 -->
+<!-- </RelativeLayout> -->
+</LinearLayout>
+<!-- transsion end -->

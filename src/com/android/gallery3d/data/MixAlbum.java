@@ -10,6 +10,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.SystemClock;
+import android.os.storage.StorageManager;
 import android.provider.BaseColumns;
 import android.provider.MediaStore.Files;
 import android.provider.MediaStore.Files.FileColumns;
@@ -24,6 +25,7 @@ import com.android.gallery3d.util.GalleryUtils;
 import com.mediatek.gallery3d.util.TraceHelper;
 import com.android.gallery3d.common.Utils;
 import com.android.gallery3d.data.MixAlbum.Range;
+import com.mediatek.storage.StorageManagerEx;
 
 
 public class MixAlbum extends MediaSet {
@@ -117,6 +119,7 @@ public class MixAlbum extends MediaSet {
     private int mVideoCount = INVALID_COUNT;
 
     private final ChangeNotifier mNotifier;
+    private static StorageManager sStorageManager = null;
 
     private ArrayList<Range> mDaysInfo;
     private static final Uri[] mWatchUris = new Uri[] { Images.Media.EXTERNAL_CONTENT_URI,
@@ -159,6 +162,10 @@ public class MixAlbum extends MediaSet {
         Context context = application.getAndroidContext();
         Resources res = context.getResources();
         ArrayList<String> folders = new ArrayList<String>();
+        if (sStorageManager == null) {
+            sStorageManager = (StorageManager) context
+                    .getSystemService(Context.STORAGE_SERVICE);
+        }
         String[] strings = res.getStringArray(R.array.camera_folders);
         for (String folder : strings) {
             addFolder(folders, folder);
@@ -169,9 +176,18 @@ public class MixAlbum extends MediaSet {
             addFolder(folders, folder);
         }
 
+        String[] volumes = sStorageManager.getVolumePaths();
         String external = Environment.getExternalStorageDirectory().getPath();
         String internal = null;
+        for (String str : volumes) {
+            if (StorageManagerEx.isExternalSDCard(str)) {
+                Log.i(TAG, "<getExternalCacheDir> " + str + " isExternalSDCard");
+                internal = str;
+                break;
+            }
+        }
         StringBuffer buffer = new StringBuffer();
+        buffer.append("(");
         buffer.append(ImageColumns.BUCKET_ID + " IN (");
         for (int i = 0, size = folders.size(); i < size; i++) {
             if (internal != null) {
@@ -196,6 +212,11 @@ public class MixAlbum extends MediaSet {
                     + FileColumns.MEDIA_TYPE_IMAGE + "," + FileColumns.MEDIA_TYPE_VIDEO + ")");
         }
 
+        buffer.append(" AND ((is_drm=0 OR is_drm IS NULL) OR ((is_drm=1) AND ((((drm_method=1) OR (drm_method=2)) OR (drm_method=4)) OR (drm_method=8)))))");
+        buffer.append(" AND ( group_id = 0 OR (group_id IS NOT NULL AND title NOT LIKE 'IMG%CS') "
+        		+ "OR group_id IS NULL) OR _id in (SELECT min(_id) FROM images WHERE group_id != 0 "
+        		+ "AND title LIKE 'IMG%CS' GROUP BY group_id)");
+        Log.w(TAG,"mWhereClause = " + buffer.toString());
         return buffer.toString();
     }
 
@@ -348,7 +369,7 @@ public class MixAlbum extends MediaSet {
                     /// M: [DEBUG.ADD] @{
                     TraceHelper.traceBegin(">>>>LocalAlbum-loadOrUpdateItem-new LocalVideo");
                     /// @}
-                    item = new LocalVideo(path, app, cursor);
+                    item = new LocalVideo(path, app, cursor, INDEX_RESOLUTION);
                     /// M: [DEBUG.ADD] @{
                     TraceHelper.traceEnd();
                     // @}

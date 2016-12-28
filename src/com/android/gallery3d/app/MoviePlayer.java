@@ -1145,6 +1145,12 @@ public class MoviePlayer implements
         if (LOG) {
             Log.v(TAG, "playVideo()");
         }
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.01
+        ((AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE)).requestAudioFocus(
+                    this, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT);
+        // transsion end
+
         /// M: resume mPauseBuffering to false for show buffering info to user.
         mPlayerExt.mPauseBuffering = false;
         mTState = TState.PLAYING;

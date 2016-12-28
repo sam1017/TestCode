@@ -53,6 +53,11 @@ public class MyActionBar {
     }
 
     public void setTitle(CharSequence title) {
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        if (getActionBar() == null) {
+            return;
+        }
+        // transsion end
         getActionBar().setTitle(title);
         if (mActionMode != null) {
             mActionMode.setTitle(title);
@@ -60,6 +65,11 @@ public class MyActionBar {
     }
 
     public void setTitle(int resId) {
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        if (getActionBar() == null) {
+            return;
+        }
+        // transsion end
         getActionBar().setTitle(resId);
         if (mActionMode != null) {
             mActionMode.setTitle(resId);
@@ -70,6 +80,11 @@ public class MyActionBar {
         if (mInSelectedMode) {
             mActionMode.setSubtitle(subtitle);
         } else {
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+            if (getActionBar() == null) {
+                return;
+            }
+            // transsion end
             getActionBar().setSubtitle(subtitle);
         }
     }
@@ -78,12 +93,22 @@ public class MyActionBar {
         if (mInSelectedMode) {
             mActionMode.setSubtitle(resId);
         } else {
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+            if (getActionBar() == null) {
+                return;
+            }
+            // transsion end
             getActionBar().setSubtitle(resId);
         }
     }
 
     public void setBackground(Drawable background) {
         if (!mInSelectedMode) {
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+            if (getActionBar() == null) {
+                return;
+            }
+            // transsion end
             getActionBar().setBackgroundDrawable(background);
         }
     }
@@ -93,10 +118,20 @@ public class MyActionBar {
     }
 
     private void saveActionBarState() {
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        if (getActionBar() == null) {
+            return;
+        }
+        // transsion end
         mActionBarState = getActionBar().isShowing();
     }
 
     private void updateActionBarState() {
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        if (getActionBar() == null) {
+            return;
+        }
+        // transsion end
         if (mActionBarState) {
             getActionBar().show();
         } else {
@@ -105,10 +140,20 @@ public class MyActionBar {
     }
 
     public int getVisibility() {
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        if (getActionBar() == null) {
+            return View.GONE;
+        }
+        // transsion end
         return getActionBar().isShowing() ? View.VISIBLE : View.GONE;
     }
 
     public void setVisibility(int visibility) {
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        if (getActionBar() == null) {
+            return;
+        }
+        // transsion end
         if (mInSelectedMode) {
             return;
         }
@@ -151,6 +196,11 @@ public class MyActionBar {
             DisplayMetrics dm = new DisplayMetrics();
             ((Activity) mActivity).getWindowManager().getDefaultDisplay().getMetrics(dm);
             if (dm.widthPixels != width || dm.heightPixels != height) {
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+                if (mActionBar == null) {
+                    return 0;
+                }
+                // transsion end
                 return mActionBar.getHeight();
             }
         }
@@ -159,6 +209,7 @@ public class MyActionBar {
 
     public void setSelectedMode(boolean selected) {
         mInSelectedMode = selected;
+        /*
         if (mInSelectedMode) {
             saveActionBarState();
             mActionMode = mActivity.startActionMode(mActionModeCallback);
@@ -169,6 +220,7 @@ public class MyActionBar {
             }
             updateActionBarState();
         }
+        */
     }
 
     public void setListener(Listener listener) {

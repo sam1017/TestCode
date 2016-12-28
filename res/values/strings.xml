@@ -1127,9 +1127,22 @@ CHAR LIMIT = NONE] -->
 	<string name="today">Today</string>
     <string name="yesterday">Yesterday</string>
 
+    <string name="action_funny">Celebrity</string>
+    <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.12.21 -->
+    <!-- <string name="share_error_text" msgid="5315144556325243400">"You can not share more than 300 files at once。"</string> -->
+    <string name="share_error_text">"You can not share more than 300 images at once."</string>
+    <!-- transsion end -->
+    <string name="add_new_gallery_folder">New Album</string>
+    
     <!-- String indicating how many photos are in an album [CHAR LIMIT=15] -->
     <plurals name="number_of_photos">
         <item quantity="one">%1$d photo</item>
         <item quantity="other">%1$d photos</item>
     </plurals>
+
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.20 -->
+    <string name="copy_error_text" >"You can not copy more than 300 images at once."</string>
+    <string name="move_error_text">"You can not move more than 300 images at once."</string>
+    <!-- transsion end -->
+    
 </resources>

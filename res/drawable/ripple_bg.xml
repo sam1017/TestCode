@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+         Copyright (c) 2016-2036  TRANSSION HOLDINGS                               
+                                                                                   
+    PROPRIETARY RIGHTS of TRANSSION HOLDINGS are involved in the                   
+    subject matter of this material.  All manufacturing, reproduction, use,        
+    and sales rights pertaining to this subject matter are governed by the         
+    license agreement.  The recipient of this software implicitly accepts          
+    the terms of the license.                                                      
+                                                                                   
+    Description: bottom button ripple clicking effect                              
+    Author:      IB-02533                                                          
+    Version:     V1.0                                                              
+    Date:        2016.11.19                                                        
+    Modification:                                                                  
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<!-- transsion begin, IB-02533, xieweiwei, modify, 2016.11.28 -->
+<!--<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="#ff007aff">-->
+<ripple xmlns:android="http://schemas.android.com/apk/res/android"
+    android:color="@color/ripple_effect_color">
+<!-- transsion end -->
+    <!-- it seems that there is no effect to set "android:radius" -->
+    <corners android:radius="@dimen/button_corner_radius" />
+</ripple>
+
+  <!--weifang.han add ripple amiation 2016/10/13 -->

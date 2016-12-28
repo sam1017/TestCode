@@ -73,9 +73,12 @@ import android.provider.Settings.SettingNotFoundException;
 import java.io.FileNotFoundException;
 
 
-
 // transsion begin, IB-02533, xieweiwei, add, 2016.09.22
 import com.mediatek.aal.AalUtils;
+// transsion end
+
+// transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+import com.transsion.gallery3d.ui.FloatingActionBar;
 // transsion end
 
 public class AbstractGalleryActivity extends Activity implements GalleryContext {
@@ -94,6 +97,12 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
     private AlertDialog mAlertDialog = null;
     /// M: [BUG.ADD] sign gallery status. @{
     private volatile boolean mHasPausedActivity;
+    private volatile boolean mIsActivityResume = false;
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.15
+    protected FloatingActionBar mFloatingActionBar;
+    // transsion end
+
     /// @}
     private BroadcastReceiver mMountReceiver = new BroadcastReceiver() {
         @Override
@@ -123,7 +132,9 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
         super.onCreate(savedInstanceState);
         mOrientationManager = new OrientationManager(this);
         toggleStatusBarByOrientation();
-        getWindow().setBackgroundDrawable(null);
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.01
+        //getWindow().setBackgroundDrawable(null);
+        // transsion end
         mPanoramaViewHelper = new PanoramaViewHelper(this);
         mPanoramaViewHelper.onCreate();
         doBindBatchService();
@@ -136,7 +147,8 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
         /// M: [BUG.ADD] leave selection mode when plug out sdcard. @{
         registerStorageReceiver();
         /// @}
-
+        registerLocaleReceiver();
+        
         /// M: [FEATURE.ADD] Image DC @{
         ImageDC.resetImageDC(((Context) this));
         /// @}
@@ -156,10 +168,11 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
     @Override
     public void onConfigurationChanged(Configuration config) {
         super.onConfigurationChanged(config);
-        mStateManager.onConfigurationChange(config);
         getGalleryActionBar().onConfigurationChanged();
         invalidateOptionsMenu();
         toggleStatusBarByOrientation();
+        Log.w(TAG,"onConfigurationChanged ");
+        mStateManager.onConfigurationChange(config);
         /// M: [BUG.ADD] @{
         // the picture show abnormal after rotate device to landscape mode,
         // lock device, rotate device to portrait mode,
@@ -209,14 +222,17 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
     @Override
     public void setContentView(int resId) {
         super.setContentView(resId);
-        mViewPagerHelper = new ViewPagerHelper(this);
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.19
+        //mViewPagerHelper = new ViewPagerHelper(this);
+        // transsion end
         mGLRootView = (GLRootView) findViewById(R.id.gl_root_view);
         /// M: [FEATURE.ADD] @{
         PhotoPlayFacade.registerMedias(this.getAndroidContext(),
                 mGLRootView.getGLIdleExecuter());
         /// @}
-        
-        mGLRootView.setContentPane(mViewPagerHelper.getGlViewPager());
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.19
+        //mGLRootView.setContentPane(mViewPagerHelper.getGlViewPager());
+        // transsion end
     }
 
     protected void onStorageReady() {
@@ -305,7 +321,7 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
         }
         /// @}
         super.onResume();
-
+        mIsActivityResume = true;
         // transsion begin, IB-02533, xieweiwei, add, 2016.09.22
         // turn off back light balance
         AalUtils.getInstance().setEnabled(this, false);
@@ -347,7 +363,8 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
     @Override
     protected void onPause() {
         super.onPause();
-
+        mIsActivityResume = false;
+        Log.w(TAG,"onPause");
         // transsion begin, IB-02533, xieweiwei, add, 2016.09.22
         // turn on back light balance
         AalUtils.getInstance().setEnabled(this, true);
@@ -385,6 +402,7 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.w(TAG,"onDestroy");
         mGLRootView.lockRenderThread();
         try {
             getStateManager().destroy();
@@ -397,7 +415,15 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
         /// @}
         /// M: [BUG.ADD] leave selection mode when plug out sdcard @{
         unregisterReceiver(mStorageReceiver);
+        unregisterReceiver(mLocaleReceiver);
         /// @}
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        // transsion begin, IB-02533, xieweiwei, modify, 2016.12.15
+        //FloatingActionBar.getInstance(this).destroy();
+        getFloatingActionBar().destroy();
+        // transsion end
+        // transsion end
     }
 
     @Override
@@ -455,14 +481,16 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
     }
 
     // Shows status bar in portrait view, hide in landscape view
-    private void toggleStatusBarByOrientation() {
+    public void toggleStatusBarByOrientation() {
         if (mDisableToggleStatusBar) return;
 
+        Log.w(TAG,"toggleStatusBarByOrientation ");
         Window win = getWindow();
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             win.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         } else {
-            win.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            win.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            //win.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
         }
     }
 
@@ -628,6 +656,22 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
         registerReceiver(mStorageReceiver, filter);
     }
     /// @}
+    private BroadcastReceiver mLocaleReceiver;
+    private void registerLocaleReceiver() {
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_LOCALE_CHANGED);
+        mLocaleReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                String action = intent.getAction();
+                if (Intent.ACTION_LOCALE_CHANGED.equals(action)) {
+                    Log.w(TAG,"context = " + context + " intent = " + intent);
+                    finish();
+                }
+            }
+        };
+        registerReceiver(mLocaleReceiver, filter);
+    }
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
@@ -669,6 +713,14 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
         return mViewPagerHelper;
     }
 
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.19
+    public void initViewPagerHelper() {
+        if (mViewPagerHelper == null) {
+            mViewPagerHelper = new ViewPagerHelper(this);
+        }
+    }
+    // transsion end
+
     public TabViewManager getTabViewManager() {
         return mTabViewManager;
     }
@@ -679,5 +731,17 @@ public class AbstractGalleryActivity extends Activity implements GalleryContext 
         }
         return mMyActionBar;
     }
-    
+
+    public boolean getIsActivityResume(){
+        return mIsActivityResume;
+    }
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.15
+    public FloatingActionBar getFloatingActionBar() {
+        if (mFloatingActionBar == null) {
+            mFloatingActionBar = new FloatingActionBar(this, true);
+        }
+        return mFloatingActionBar;
+    }
+    // transsion end
 }

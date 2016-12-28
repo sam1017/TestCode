@@ -441,4 +441,32 @@
         <item quantity="one">"%1$d 项被选中"</item>
         <item quantity="other">"%1$d 项被选中"</item>
     </plurals>
+
+    <string name="current_week_sunday">"星期日"</string>
+    <string name="current_week_monday">"星期一"</string>
+    <string name="current_week_tuesday">"星期二"</string>
+    <string name="current_week_wednesday">"星期三"</string>
+    <string name="current_week_thursday">"星期四"</string>
+    <string name="current_week_friday">"星期五"</string>
+    <string name="current_week_saturday">"星期六"</string>
+    <string name="last_week_sunday">"上周日"</string>
+    <string name="last_week_monday">"上周一"</string>
+    <string name="last_week_tuesday">"上周二"</string>
+    <string name="last_week_wednesday">"上周三"</string>
+    <string name="last_week_thursday">"上周四"</string>
+    <string name="last_week_friday">"上周五"</string>
+    <string name="last_week_saturday">"上周六"</string>
+	<string name="today">今天</string>
+    <string name="yesterday">昨天</string>	
+    <string name="action_funny">明星妆</string>
+    <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.12.21 -->
+    <!-- <string name="share_error_text" msgid="5315144556325243400">"不能一次性分享超过300个文件。"</string> -->
+    <string name="share_error_text">"不能一次性分享超过300个图片。"</string>
+    <!-- transsion end -->
+    <string name="add_new_gallery_folder">新建相册</string>
+
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.20 -->
+    <string name="copy_error_text" >"不能一次性拷贝超过300个图片。"</string>
+    <string name="move_error_text">"不能一次性移动超过300个图片。"</string>
+    <!-- transsion end -->
 </resources>

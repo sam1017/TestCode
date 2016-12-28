@@ -5,7 +5,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:paddingBottom="53dp"
+        android:paddingBottom="63dp"
         android:paddingLeft="10dp"
         android:orientation="horizontal"
         android:visibility="gone">

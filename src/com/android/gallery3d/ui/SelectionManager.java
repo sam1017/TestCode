@@ -41,6 +41,16 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
+//Xiaoyh add for add select all icon at 2016/11/22
+import android.view.Menu;
+import android.view.MenuItem;
+import com.android.gallery3d.R;
+//End
+
+// transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+import com.transsion.gallery3d.ui.FloatingActionBar;
+// transsion end
+
 public class SelectionManager {
     @SuppressWarnings("unused")
     private static final String TAG = "Gallery2/SelectionManager";
@@ -62,6 +72,14 @@ public class SelectionManager {
     private boolean mInSelectionMode;
     private boolean mAutoLeave = true;
     private int mTotal;
+    
+    //Xiaoyh add for add select all icon at 2016/11/22
+	private Menu mMenu;
+	//End
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.12
+    private boolean mIsPhotoPage = false;
+    // transsion end
 
     public interface SelectionListener {
         public void onSelectionModeChange(int mode);
@@ -82,6 +100,13 @@ public class SelectionManager {
         mTotal = -1;
     }
 
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.12
+    public SelectionManager(AbstractGalleryActivity activity, boolean isAlbumSet, boolean isPhotoPage) {
+        this(activity, isAlbumSet);
+        mIsPhotoPage = isPhotoPage;
+    }
+    // transsion end
+
     // Whether we will leave selection mode automatically once the number of
     // selected items is down to zero.
     public void setAutoLeaveSelectionMode(boolean enable) {
@@ -92,6 +117,47 @@ public class SelectionManager {
         mListener = listener;
     }
 
+    //Xiaoyh add for add select all icon at 2016/11/22
+	public void setMenu(Menu menu) {
+		mMenu = menu;
+	}
+	
+	public void setSelectAllIconRes() {
+		if (mMenu != null) {
+			MenuItem item = mMenu.findItem(R.id.action_select_all);
+
+			if (getSelectedCount() == getTotalCount()) {
+				item.setIcon(R.drawable.menu_select_all_press);
+			} else {
+				item.setIcon(R.drawable.menu_select_all_un_press);
+			}
+		}
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+        if (mActivity.getActionBar() == null) {
+        // transsion begin
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        if (getSelectedCount() == getTotalCount()) {
+            // transsion begin, IB-02533, xieweiwei, modify, 2016.12.15
+            //FloatingActionBar.getInstance(mActivity).setSelectionAll(true);
+            getFloatingActionBar().setSelectionAll(true);
+            // transsion end
+        } else {
+            // transsion begin, IB-02533, xieweiwei, modify, 2016.12.15
+            //FloatingActionBar.getInstance(mActivity).setSelectionAll(false);
+            getFloatingActionBar().setSelectionAll(false);
+            // transsion end
+        }
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+        }
+        // transsion begin
+
+	}
+	//End
+    
     public void selectAll() {
         Log.i(TAG, "<selectAll>");
         mInverseSelection = true;
@@ -99,6 +165,10 @@ public class SelectionManager {
         mTotal = -1;
         enterSelectionMode();
         if (mListener != null) mListener.onSelectionModeChange(SELECT_ALL_MODE);
+        
+        //Xiaoyh add for add select all icon at 2016/11/22
+        setSelectAllIconRes();
+        //End
     }
 
     public void deSelectAll() {
@@ -115,6 +185,10 @@ public class SelectionManager {
             mListener.onSelectionModeChange(DESELECT_ALL_MODE);
         }
         /// @}
+        
+        //Xiaoyh add for add select all icon at 2016/11/22
+        setSelectAllIconRes();
+        //End
     }
 
     public boolean inSelectAllMode() {
@@ -131,11 +205,65 @@ public class SelectionManager {
         return mInSelectionMode;
     }
 
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.15
+    public FloatingActionBar getFloatingActionBar() {
+        return mActivity.getFloatingActionBar();
+        // transsion end
+    }
+    // transsion end
+
     public void enterSelectionMode() {
         if (mInSelectionMode) return;
         Log.i(TAG, "<enterSelectionMode>");
         mInSelectionMode = true;
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.21
+        if (mActivity.getTabViewManager() != null) {
+        // transsion end
         mActivity.getTabViewManager().mLockTab = true;
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.21
+        }
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.12
+        if (!mIsPhotoPage) {
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            if (mActivity.getActionBar() == null) {
+            // transsion begin
+
+            // transsion begin, IB-02533, xieweiwei, modify, 2016.12.15
+            //FloatingActionBar.getInstance(mActivity).initSelectionMode(new FloatingActionBar.SelectionModeButtonClickListener() {
+            getFloatingActionBar().initSelectionMode(new FloatingActionBar.SelectionModeButtonClickListener() {
+            // transsion end
+                public boolean onSelectionModeBack() {
+                    mActivity.runOnUiThread(new Runnable() {
+                        public void run() {
+                            leaveSelectionMode();
+                        }
+                    });
+                    return true;
+                }
+                public void onSelectionModeAll(boolean selectAll) {
+                    if (selectAll) {
+                        selectAll();
+                    } else {
+                        deSelectAll();
+                    }
+                }
+            });
+
+            // transsion begin, IB-02533, xieweiwei, modify, 2016.12.15
+            //FloatingActionBar.getInstance(mActivity).showSelectionModeActionBar();
+            getFloatingActionBar().showSelectionModeActionBar();
+            // transsion end
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            }
+            // transsion begin
+
+        }
+        // transsion end
+
         if (mListener != null) mListener.onSelectionModeChange(ENTER_SELECTION_MODE);
     }
 
@@ -156,7 +284,32 @@ public class SelectionManager {
             mRestoreSelectionTask.cancel();
         }
         /// @}
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.21
+        if (mActivity.getTabViewManager() != null) {
+        // transsion end
         mActivity.getTabViewManager().mLockTab = false;
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.21
+        }
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.12
+        if (!mIsPhotoPage) {
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            if (mActivity.getActionBar() == null) {
+            // transsion begin
+
+            // transsion begin, IB-02533, xieweiwei, modify, 2016.12.15
+            //FloatingActionBar.getInstance(mActivity).restoreActionBarFromSelection();
+            getFloatingActionBar().restoreActionBarFromSelection();
+            // transsion end
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            }
+            // transsion begin
+        }
+        // transsion end
+
         if (mListener != null) mListener.onSelectionModeChange(LEAVE_SELECTION_MODE);
     }
 
@@ -191,7 +344,9 @@ public class SelectionManager {
             mClickedSet.remove(path);
         } else {
             enterSelectionMode();
-            mClickedSet.add(path);
+            if(path != null){
+                mClickedSet.add(path);
+            }
         }
 
         // Convert to inverse selection mode if everything is selected.

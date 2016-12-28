@@ -441,4 +441,23 @@
         <item quantity="one">تم تحديد %1$d عنصر</item>
         <item quantity="other">تم تحديد %1$d عناصر</item>
     </plurals>
+	
+    <string name="current_week_sunday">"الأحد"</string>
+    <string name="current_week_monday">"الإثنين"</string>
+    <string name="current_week_tuesday">"الثلاثاء"</string>
+    <string name="current_week_wednesday">"الأربعاء"</string>
+    <string name="current_week_thursday">"الخميس"</string>
+    <string name="current_week_friday">"الجمعة"</string>
+    <string name="current_week_saturday">"السبت"</string>
+    <string name="last_week_sunday">"الأحد الماضي "</string>
+    <string name="last_week_monday">"الاثنين الماضي"</string>
+    <string name="last_week_tuesday">"الثلاثاء الماضي"</string>
+    <string name="last_week_wednesday">"الأربعاء الماضي"</string>
+    <string name="last_week_thursday">"الخميس الماضي"</string>
+    <string name="last_week_friday">"الجمعة الماضية"</string>
+    <string name="last_week_saturday">"السبت الماضي"</string>
+    <string name="today">"اليوم"</string>
+    <string name="yesterday">"أمس"</string>
+
+    <string name="action_funny">"شخصية مشهورة"</string>
 </resources>

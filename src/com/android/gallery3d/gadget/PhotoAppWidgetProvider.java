@@ -54,7 +54,19 @@ public class PhotoAppWidgetProvider extends AppWidgetProvider {
         throw new RuntimeException("invalid type - " + entry.type);
     }
 
+    /* (non-Javadoc)
+     * @see android.appwidget.AppWidgetProvider#onReceive(android.content.Context, android.content.Intent)
+     */
     @Override
+    public void onReceive(Context context, Intent intent) {
+        // TODO Auto-generated method stub
+        final String action = intent.getAction();
+        if(action.equals("android.appwidget.action.APPWIDGET_UPDATE")){
+            super.onReceive(context, intent);
+        }
+    }
+
+	@Override
     public void onUpdate(Context context,
             AppWidgetManager appWidgetManager, int[] appWidgetIds) {
 

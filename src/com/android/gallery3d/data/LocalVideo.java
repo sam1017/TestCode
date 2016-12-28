@@ -155,6 +155,38 @@ public class LocalVideo extends LocalMediaItem {
         }
     }
 
+    public LocalVideo(Path path, GalleryApp app, Cursor cursor,
+            int indexResolution) {
+        super(path, nextVersionNumber());
+        mApplication = app;
+        loadFromCursor(cursor,indexResolution);
+        /// M: [FEATURE.ADD] @{
+        synchronized (mMediaDataLock) {
+            mMediaData = MediaDataParser.parseLocalVideoMediaData(this, cursor);
+            mExtItem = PhotoPlayFacade.getMediaCenter().getItem(mMediaData);
+        }
+        /// @}
+        // TODO Auto-generated constructor stub
+    }
+
+    private void loadFromCursor(Cursor cursor, int indexResolution) {
+        id = cursor.getInt(INDEX_ID);
+        caption = cursor.getString(INDEX_CAPTION);
+        mimeType = cursor.getString(INDEX_MIME_TYPE);
+        latitude = cursor.getDouble(INDEX_LATITUDE);
+        longitude = cursor.getDouble(INDEX_LONGITUDE);
+        dateTakenInMs = cursor.getLong(INDEX_DATE_TAKEN);
+        dateAddedInSec = cursor.getLong(INDEX_DATE_ADDED);
+        dateModifiedInSec = cursor.getLong(INDEX_DATE_MODIFIED);
+        filePath = cursor.getString(INDEX_DATA);
+        durationInSec = cursor.getInt(INDEX_DURATION) / 1000;
+        bucketId = cursor.getInt(INDEX_BUCKET_ID);
+        fileSize = cursor.getLong(INDEX_SIZE);
+        parseResolution(cursor.getString(indexResolution));
+        /// M: [FEATURE.ADD] fancy layout @{
+        /// @}
+    }
+
     private void loadFromCursor(Cursor cursor) {
         id = cursor.getInt(INDEX_ID);
         caption = cursor.getString(INDEX_CAPTION);

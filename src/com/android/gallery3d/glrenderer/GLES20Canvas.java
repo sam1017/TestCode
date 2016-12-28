@@ -142,13 +142,16 @@ public class GLES20Canvas implements GLCanvas {
 
     private static final int INITIAL_RESTORE_STATE_SIZE = 8;
     private static final int MATRIX_SIZE = 16;
+    private static final int CLIP_SIZE = 4;
 
     // Keep track of restore state
     private float[] mMatrices = new float[INITIAL_RESTORE_STATE_SIZE * MATRIX_SIZE];
     private float[] mAlphas = new float[INITIAL_RESTORE_STATE_SIZE];
+    private float[] mClips = new float[INITIAL_RESTORE_STATE_SIZE * CLIP_SIZE];
     private IntArray mSaveFlags = new IntArray();
 
     private int mCurrentAlphaIndex = 0;
+    private int mCurrentClipIndex = 0;
     private int mCurrentMatrixIndex = 0;
 
     // Viewport size
@@ -269,14 +272,17 @@ public class GLES20Canvas implements GLCanvas {
     private final float[] mTempColor = new float[4];
     private final RectF mTempSourceRect = new RectF();
     private final RectF mTempTargetRect = new RectF();
+    private final RectF mTempClipRect = new RectF();
     private final float[] mTempTextureMatrix = new float[MATRIX_SIZE];
     private final int[] mTempIntArray = new int[1];
+    private final float mMapPointsBuffer[] = new float[4];
 
     private static final GLId mGLId = new GLES20IdImpl();
 
     public GLES20Canvas() {
         Matrix.setIdentityM(mTempTextureMatrix, 0);
         Matrix.setIdentityM(mMatrices, mCurrentMatrixIndex);
+        mTempClipRect.set(0, 0, Float.MAX_VALUE, Float.MAX_VALUE);
         mAlphas[mCurrentAlphaIndex] = 1f;
         mTargetTextures.add(null);
 
@@ -298,6 +304,7 @@ public class GLES20Canvas implements GLCanvas {
                 mOesTextureParameters);
         mMeshProgram = assembleProgram(meshVertexShader, textureFragmentShader, mMeshParameters);
         GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA);
+        GLES20.glEnable(GLES20.GL_SCISSOR_TEST);
         checkError();
     }
 
@@ -467,6 +474,17 @@ public class GLES20Canvas implements GLCanvas {
             }
             System.arraycopy(mMatrices, currentIndex, mMatrices, mCurrentMatrixIndex, MATRIX_SIZE);
         }
+        boolean saveClip = (saveFlags & SAVE_FLAG_CLIP) == SAVE_FLAG_CLIP;
+        if (saveClip) {
+            int currentIndex = mCurrentClipIndex;
+            mCurrentClipIndex += CLIP_SIZE;
+            if (mClips.length <= mCurrentClipIndex) {
+                mClips = Arrays.copyOf(mClips, mClips.length * 2);
+            }
+            System.arraycopy((Object)mClips, currentIndex, (Object)mClips, mCurrentClipIndex, CLIP_SIZE);
+            mTempClipRect.set(mClips[currentIndex], mClips[currentIndex + 1],
+                    mClips[currentIndex + 2], mClips[currentIndex + 3]);
+        }
         mSaveFlags.add(saveFlags);
     }
 
@@ -480,6 +498,14 @@ public class GLES20Canvas implements GLCanvas {
         boolean restoreMatrix = (restoreFlags & SAVE_FLAG_MATRIX) == SAVE_FLAG_MATRIX;
         if (restoreMatrix) {
             mCurrentMatrixIndex -= MATRIX_SIZE;
+        }
+        boolean restoreClip = (restoreFlags & SAVE_FLAG_CLIP) == SAVE_FLAG_CLIP;
+        if (restoreClip) {
+            mCurrentClipIndex -= CLIP_SIZE;
+            mTempClipRect.set(mClips[mCurrentClipIndex], mClips[mCurrentClipIndex + 1],
+                    mClips[mCurrentClipIndex + 2], mClips[mCurrentClipIndex + 3]);
+            clipRect((int)mTempClipRect.left, (int)mTempClipRect.top,
+                    (int)mTempClipRect.right, (int)mTempClipRect.bottom);
         }
     }
 
@@ -649,10 +675,10 @@ public class GLES20Canvas implements GLCanvas {
     // It also clips the source and target coordinates if it is beyond the
     // bound of the texture.
     private static void convertCoordinate(RectF source, RectF target, BasicTexture texture) {
-        int width = texture.getWidth();
-        int height = texture.getHeight();
-        int texWidth = texture.getTextureWidth();
-        int texHeight = texture.getTextureHeight();
+        double width = texture.getWidth();
+        double height = texture.getHeight();
+        double texWidth = texture.getTextureWidth();
+        double texHeight = texture.getTextureHeight();
         // Convert to texture coordinates
         source.left /= texWidth;
         source.right /= texWidth;
@@ -660,15 +686,21 @@ public class GLES20Canvas implements GLCanvas {
         source.bottom /= texHeight;
 
         // Clip if the rendering range is beyond the bound of the texture.
-        float xBound = (float) width / texWidth;
+        double xBound = (float) width / texWidth;
         if (source.right > xBound) {
-            target.right = target.left + target.width() * (xBound - source.left) / source.width();
-            source.right = xBound;
+            target.right = (float) (target.left + target.width() * (xBound - source.left) / source.width());
+            // for bug:740774
+            // source.right = xBound;
+//            source.right = (float) (width - 1) / texWidth;
+            source.right = (float) (width / texWidth);
         }
-        float yBound = (float) height / texHeight;
+        double yBound = (float) height / texHeight;
         if (source.bottom > yBound) {
-            target.bottom = target.top + target.height() * (yBound - source.top) / source.height();
-            source.bottom = yBound;
+            target.bottom = (float) (target.top + target.height() * (yBound - source.top) / source.height());
+            // for bug:740774
+            // source.bottom = yBound;
+//            source.bottom = (float) (height - 1) / texHeight;
+            source.bottom = (float) (height / texHeight);
         }
     }
 
@@ -778,6 +810,11 @@ public class GLES20Canvas implements GLCanvas {
 
         float currentAlpha = getAlpha();
         float cappedRatio = Math.min(1f, Math.max(0f, ratio));
+
+        // kexiuhua@Plf.MediaApp, add for 1 pix had no draw on right
+        target.right = (float) Math.ceil((double)target.right);
+        target.bottom = (float) Math.ceil((double)target.bottom);
+        // kexiuhua@Plf.MediaApp, add end
 
         float textureAlpha = (1f - cappedRatio) * currentAlpha;
         setAlpha(textureAlpha);
@@ -908,6 +945,9 @@ public class GLES20Canvas implements GLCanvas {
                 case GLES20.GL_FRAMEBUFFER_UNSUPPORTED:
                     msg = "GL_FRAMEBUFFER_UNSUPPORTED";
                     break;
+                case 0:
+                    msg = "GL_ERROR_OCCURS";
+                    break;
             }
             throw new RuntimeException(msg + ":" + Integer.toHexString(status));
         }
@@ -1020,13 +1060,82 @@ public class GLES20Canvas implements GLCanvas {
         return mGLId;
     }
 
-    public void clipRect(int left, int top, int right, int bottom) {
-    }    
-//********************************************************************
-//*                              MTK                                 *
-//********************************************************************
+    // Transforms two points by the given matrix m. The result
+    // {x1', y1', x2', y2'} are stored in mMapPointsBuffer and also returned.
+    private float[] mapPoints(float m[], int offset, int x1, int y1, int x2, int y2) {
+        float[] r = mMapPointsBuffer;
 
-    private MGLES20Canvas mMGLCanvas;
+        // Multiply m and (x1 y1 0 1) to produce (x3 y3 z3 w3). z3 is unused.
+        float x3 = m[0 + offset] * x1 + m[4 + offset] * y1 + m[12 + offset];
+        float y3 = m[1 + offset] * x1 + m[5 + offset] * y1 + m[13 + offset];
+        float w3 = m[3 + offset] * x1 + m[7 + offset] * y1 + m[15 + offset];
+        r[0] = x3 / w3;
+        r[1] = y3 / w3;
+
+        // Same for x2 y2.
+        float x4 = m[0 + offset] * x2 + m[4 + offset] * y2 + m[12 + offset];
+        float y4 = m[1 + offset] * x2 + m[5 + offset] * y2 + m[13 + offset];
+        float w4 = m[3 + offset] * x2 + m[7 + offset] * y2 + m[15 + offset];
+        r[2] = x4 / w4;
+        r[3] = y4 / w4;
+
+        return r;
+    }
+
+    /* (non-Javadoc)
+     * @see com.oppo.gallery3d.glrenderer.GLCanvas#clipRect(int, int, int, int)
+     */
+    @Override
+    public boolean clipRect(int left, int top, int right, int bottom) {
+        float point[] = mapPoints(mMatrices, mCurrentMatrixIndex, left, top, right, bottom);
+
+        // mMatrix could be a rotation matrix. In this case, we need to find
+        // the boundaries after rotation. (only handle 90 * n degrees)
+        if (point[0] > point[2]) {
+            left = (int) point[2];
+            right = (int) point[0];
+        } else {
+            left = (int) point[0];
+            right = (int) point[2];
+        }
+        if (point[1] > point[3]) {
+            top = (int) point[3];
+            bottom = (int) point[1];
+        } else {
+            top = (int) point[1];
+            bottom = (int) point[3];
+        }
+        mTempClipRect.set(mClips[mCurrentClipIndex], mClips[mCurrentClipIndex + 1],
+                mClips[mCurrentClipIndex + 2], mClips[mCurrentClipIndex + 3]);
+        boolean intersect = mTempClipRect.intersect(left, top, right, bottom);
+        mTempClipRect.set(left, top, right, bottom);
+        if (mTempClipRect.isEmpty()) {
+            GLES20.glScissor(0, 0, mScreenWidth, mScreenHeight);
+        } else {
+            GLES20.glScissor((int)mTempClipRect.left, (int)mTempClipRect.top, (int)mTempClipRect.width(), (int)mTempClipRect.height());
+        }
+
+//        boolean intersect = mTempClipRect.intersect(left, top, right, bottom);
+//        if (!intersect) {
+//            mTempClipRect.set(0, 0, 0, 0);
+//        //kexiuhua@Plf.MediaApp, for : glScissor(0,0,0,0) will enable in MTK
+//        } else if (SWITCHER_DISABLE_CLIP_WHEN_ZONE) {
+//            GLES20.glScissor((int)mTempClipRect.left, (int)mTempClipRect.top, (int)mTempClipRect.width(), (int)mTempClipRect.height());
+//        }
+//        if (!SWITCHER_DISABLE_CLIP_WHEN_ZONE) {
+//            mTempClipRect.set(left, top, right, bottom);
+//            if (mTempClipRect.isEmpty()) {
+//                GLES20.glScissor(0, 0, mScreenWidth, mScreenHeight);
+//            } else {
+//                GLES20.glScissor((int)mTempClipRect.left, (int)mTempClipRect.top, (int)mTempClipRect.width(), (int)mTempClipRect.height());
+//            }
+//        }
+        //kexiuhua@Plf.MediaApp, end
+        return intersect;
+    }
+
+
+	private MGLES20Canvas mMGLCanvas;
 
     public MGLCanvas getMGLCanvas() {
         if (mMGLCanvas == null) {

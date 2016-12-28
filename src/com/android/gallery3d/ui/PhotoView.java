@@ -1656,6 +1656,11 @@ public class PhotoView extends GLView implements PlayEngine.OnFrameAvailableList
     public void setFilmMode(boolean enabled) {
         if (mFilmMode == enabled) return;
         mFilmMode = enabled;
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.21
+        mFilmMode = false;
+        // transsion end
+
         mPositionController.setFilmMode(mFilmMode);
         mModel.setNeedFullImage(!enabled);
         mModel.setFocusHintDirection(

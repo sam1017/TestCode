@@ -62,6 +62,10 @@
 
     <uses-permission android:name="android.permission.WRITE_APN_SETTINGS" />
 
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.11.22 -->
+     <uses-permission android:name="android.permission.STATUS_BAR" />
+    <!-- transsion end -->
+
     <supports-screens android:smallScreens="false"
             android:normalScreens="true" android:largeScreens="true"
             android:anyDensity="true" />
@@ -165,7 +169,7 @@
         </activity>
 
         <activity android:name="com.android.gallery3d.app.GalleryActivity" android:label="@string/app_name"
-                android:configChanges="keyboardHidden|orientation|screenSize|mnc|mcc">
+                android:configChanges="keyboardHidden|orientation|screenSize|mnc|mcc|fontScale">
                 <!-- bug modify
                 android:configChanges="keyboardHidden|orientation|screenSize"-->
             <intent-filter>
@@ -323,7 +327,11 @@
         <activity android:name="com.android.gallery3d.app.TrimVideo"
                 android:taskAffinity="com.android.gallery3d.app.TrimVideo"
                 android:configChanges="orientation|keyboardHidden|screenSize|mnc|mcc"
-                android:label="@string/trim_label" >
+                android:theme="@style/Theme.TrimVideo"
+                android:label="@string/trim_label">
+            <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.22 -->
+            <!-- android:theme="@style/Theme.TrimVideo" -->
+            <!-- transsion end -->
             <intent-filter android:label="@string/crop_label">
                 <action android:name="com.android.camera.action.TRIM" />
                 <category android:name="android.intent.category.DEFAULT" />

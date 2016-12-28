@@ -228,6 +228,12 @@ public abstract class UploadedTexture extends BasicTexture {
     	}
         Bitmap bitmap = getBitmap();
         if (bitmap != null) {
+            if (bitmap.isRecycled()) {
+                Log.w(TAG, "Texture load fail, original bitmap is recycled");
+                mState = STATE_ERROR;
+                mContentValid = false;
+                return;
+            }
             try {
                 int bWidth = bitmap.getWidth();
                 int bHeight = bitmap.getHeight();

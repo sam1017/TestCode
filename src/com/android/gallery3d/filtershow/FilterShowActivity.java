@@ -70,6 +70,7 @@ import android.widget.PopupMenu;
 import android.widget.ShareActionProvider;
 import android.widget.ShareActionProvider.OnShareTargetSelectedListener;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.gallery3d.R;
@@ -157,6 +158,10 @@ public class FilterShowActivity extends FragmentActivity implements OnItemClickL
     public static final String LAUNCH_FULLSCREEN = "launch-fullscreen";
     public static final boolean RESET_TO_LOADED = false;
     private ImageShow mImageShow = null;
+
+    private TextView mCancalButton = null;
+    private TextView mResetButton = null;
+    private TextView mNewSaveButton = null;
 
     private View mSaveButton = null;
 
@@ -404,18 +409,20 @@ public class FilterShowActivity extends FragmentActivity implements OnItemClickL
         setContentView(R.layout.filtershow_activity);
 
         ActionBar actionBar = getActionBar();
-        actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
-        actionBar.setCustomView(R.layout.filtershow_actionbar);
-        actionBar.setBackgroundDrawable(new ColorDrawable(
-                getResources().getColor(R.color.background_screen)));
+        if(actionBar != null){
+            actionBar.setDisplayOptions(ActionBar.DISPLAY_SHOW_CUSTOM);
+            actionBar.setCustomView(R.layout.filtershow_actionbar);
+            actionBar.setBackgroundDrawable(new ColorDrawable(
+                    getResources().getColor(R.color.background_screen)));
 
-        mSaveButton = actionBar.getCustomView();
-        mSaveButton.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                saveImage();
-            }
-        });
+            mSaveButton = actionBar.getCustomView();
+            mSaveButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    saveImage();
+                }
+            });
+        }
 
         mImageShow = (ImageShow) findViewById(R.id.imageShow);
         mImageViews.add(mImageShow);
@@ -425,6 +432,38 @@ public class FilterShowActivity extends FragmentActivity implements OnItemClickL
         mEditorPlaceHolder.hide();
         mImageShow.attach();
 
+        mCancalButton = (TextView) findViewById(R.id.cancelbutton);
+        if(mCancalButton != null){
+            mCancalButton.setClickable(true);
+            mCancalButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View arg0) {
+                    onBackPressed();
+                }
+            });
+        }
+
+        mNewSaveButton = (TextView) findViewById(R.id.savebutton);
+        if(mNewSaveButton != null){
+            mNewSaveButton.setClickable(true);
+            mNewSaveButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View arg0) {
+                	saveImage();
+                }
+            });
+        }
+
+        mResetButton = (TextView) findViewById(R.id.resetbutton);
+        if(mResetButton != null){
+            mResetButton.setClickable(true);
+            mResetButton.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View arg0) {
+                    resetHistory();
+                }
+            });
+        }
         setupStatePanel();
     }
 
@@ -1115,7 +1154,7 @@ public class FilterShowActivity extends FragmentActivity implements OnItemClickL
         mShareActionProvider.setOnShareTargetSelectedListener(this);
         mMenu = menu;
         setupMenu();
-        return true;
+        return false; //true;
     }
 
     private void setupMenu(){
@@ -1341,6 +1380,22 @@ public class FilterShowActivity extends FragmentActivity implements OnItemClickL
     public void enableSave(boolean enable) {
         if (mSaveButton != null) {
             mSaveButton.setEnabled(enable);
+        }
+        if (mNewSaveButton != null) {
+            mNewSaveButton.setEnabled(enable);
+            if(enable){
+                mNewSaveButton.setTextColor(this.getResources().getColor(R.color.filtershow_textview_enable_color));
+            }else{
+                mNewSaveButton.setTextColor(this.getResources().getColor(R.color.filtershow_textview_disable_color));
+            }
+        }
+        if (mResetButton != null) {
+            mResetButton.setEnabled(enable);
+            if(enable){
+                mResetButton.setTextColor(this.getResources().getColor(R.color.filtershow_textview_enable_color));
+            }else{
+                mResetButton.setTextColor(this.getResources().getColor(R.color.filtershow_textview_disable_color));
+            }
         }
     }
 

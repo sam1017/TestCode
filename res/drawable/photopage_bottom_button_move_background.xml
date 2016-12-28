@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+         Copyright (c) 2016-2036  TRANSSION HOLDINGS                               
+                                                                                   
+    PROPRIETARY RIGHTS of TRANSSION HOLDINGS are involved in the                   
+    subject matter of this material.  All manufacturing, reproduction, use,        
+    and sales rights pertaining to this subject matter are governed by the         
+    license agreement.  The recipient of this software implicitly accepts          
+    the terms of the license.                                                      
+                                                                                   
+    Description: For support move bottom control                                   
+    Author:      IB-02533                                                          
+    Version:     V1.0                                                              
+    Date:        2016.12.20                                                        
+    Modification:                                                                  
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="true" android:drawable="@drawable/move_normal" />
+    <item android:state_enabled="false" android:drawable="@drawable/move_unavailable" />
+    <item android:state_pressed="true" android:drawable="@drawable/move_normal" />
+    <item android:state_pressed="false" android:drawable="@drawable/move_normal" />
+</selector>

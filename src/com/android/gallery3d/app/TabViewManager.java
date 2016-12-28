@@ -16,6 +16,10 @@ import com.android.gallery3d.util.GalleryUtils;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 
+// transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+import com.transsion.gallery3d.ui.FloatingActionBar;
+// transsion end
+
 /**
  *
  *@author  Create by liangchangwei   
@@ -43,17 +47,30 @@ public class TabViewManager {
         }
         Log.w(TAG, "TabViewManager mStatusBarSize = " + mStatusBarSize);
         mActionBar = ((Activity) mActivity).getActionBar();
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.19
+        if (mActivity.getViewPagerHelper() != null) {
+        // transsion end
         mActivity.getViewPagerHelper().setOnPageChangeListener(mOnPageChangeListener);
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.19
+        }
+        // transsion end
         mMainHandler = new Handler(mActivity.getMainLooper());
         initTab();
     }
 
     public int getVisibility() {
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        if (mActionBar != null) {
+        // transsion end
         if (mActionBar.getNavigationMode() == ActionBar.NAVIGATION_MODE_TABS) {
             return View.VISIBLE;
         } else {
             return View.GONE;
         }
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        }
+        return View.GONE;
+        // transsion end
     }
 
     public void setVisibility(int visibility) {
@@ -69,22 +86,80 @@ public class TabViewManager {
     }
 
     public boolean getTabEnable() {
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        if (mActionBar != null) {
+        // transsion end
+
         return mActionBar.getNavigationMode() == ActionBar.NAVIGATION_MODE_TABS;
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        }
+        return false;
+        // transsion end
     }
 
     private void hideTab() {
         Log.d(TAG, "hideTab: ");
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        if (mActionBar != null) {
+        // transsion end
         mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
-        mActionBar.setDisplayShowTitleEnabled(true);
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.02
+        //mActionBar.setDisplayShowTitleEnabled(true);
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.06
+        //// transsion begin, IB-02533, xieweiwei, add, 2016.12.06
+        //mActionBar.setDisplayShowTitleEnabled(true);
+        //// transsion end
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.02
+        mActionBar.hide();
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        }
+        // transsion end
+
     }
 
     private void initTab() {
-        Tab tab = mActionBar.newTab().setText(R.string.tab_albums).setTabListener(mTabListener);
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.03
+        //// transsion begin, IB-02533, xieweiwei, add, 2016.12.02
+        ////mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+        //// transsion end
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        if (mActionBar != null) {
+        // transsion end
+        Tab tab = mActionBar.newTab().setText(R.string.tab_photos).setTabListener(mTabListener);
         mActionBar.addTab(tab, mCurrentTabIndex == 0);
 
-        Tab tab2 = mActionBar.newTab().setText(R.string.tab_photos).setTabListener(mTabListener);
+        Tab tab2 = mActionBar.newTab().setText(R.string.tab_albums).setTabListener(mTabListener);
         mActionBar.addTab(tab2, mCurrentTabIndex == 1);
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        }
+        // transsion end
         Log.w(TAG, "TabViewManager initTab ");
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+        if (mActivity.getActionBar() == null) {
+        // transsion begin
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+        // transsion begin, IB-02533, xieweiwei, modify, 2016.12.15
+        //FloatingActionBar.getInstance(mActivity).initTab();
+        //FloatingActionBar.getInstance(mActivity).showTabActionBar();
+        getFloatingActionBar().initTab();
+        getFloatingActionBar().showTabActionBar();
+        // transsion end
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+        }
+        // transsion begin
 
     }
 
@@ -104,8 +179,21 @@ public class TabViewManager {
 
     private void showTab() {
         Log.d(TAG, "showTab: ");
-        mActionBar.setDisplayShowTitleEnabled(false);
-        mActionBar.setDisplayShowHomeEnabled(false);
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.02
+        //mActionBar.setDisplayShowTitleEnabled(false);
+        //mActionBar.setDisplayShowHomeEnabled(false);
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.06
+        //// transsion begin, IB-02533, xieweiwei, add, 2016.12.06
+        //mActionBar.setDisplayShowTitleEnabled(false);
+        //// transsion end
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        if (mActionBar != null) {
+        // transsion end
+
         mSettingShowTab = true;
         mActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         mSettingShowTab = false;
@@ -113,7 +201,24 @@ public class TabViewManager {
         mActionBar.setSelectedNavigationItem(mCurrentTabIndex);
 
         mActionBar.show();
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        }
+        // transsion end
+
     }
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.06
+    public void hideDisplayTitle() {
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        if (mActionBar != null) {
+        // transsion end
+        mActionBar.setDisplayShowTitleEnabled(false);
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        }
+        // transsion end
+    }
+    // transsion end
 
     private ActionBar.TabListener mTabListener = new TabListener() {
         @Override
@@ -123,6 +228,10 @@ public class TabViewManager {
         @Override
         public void onTabSelected(Tab tab, FragmentTransaction ft) {
             //if(mLockTab)return;
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        if (mActionBar != null) {
+        // transsion end
             if (!mActivity.getStateManager().isActivityStateValid(tab.getPosition())) {
                 mActionBar.setSelectedNavigationItem(mCurrentTabIndex);
                 return;
@@ -135,6 +244,9 @@ public class TabViewManager {
                 }
                 return;
             }
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        }
+        // transsion end
             setCurrentTabIndex(tab.getPosition());
         }
 
@@ -144,17 +256,63 @@ public class TabViewManager {
     };
 
     public void enterSelectionMode() {
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        if (mActionBar != null) {
+        // transsion end
+
         if (mActionBar.getNavigationMode() == ActionBar.NAVIGATION_MODE_TABS
                 && mActivity.getViewPagerHelper() != null) {
             mActivity.getViewPagerHelper().setHorizontalEnable(false);
         }
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        } else {
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            if (mActivity.getActionBar() == null) {
+            // transsion begin
+
+            // transsion begin, IB-02533, xieweiwei, modify, 2016.12.15
+            //if (FloatingActionBar.getInstance(mActivity).isTabActionBarShown() && mActivity.getViewPagerHelper() != null) {
+            if (getFloatingActionBar().isTabActionBarShown() && mActivity.getViewPagerHelper() != null) {
+            // transsion end
+                mActivity.getViewPagerHelper().setHorizontalEnable(false);
+            }
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            }
+            // transsion begin
+        }
+        // transsion end
     }
 
     public void leaveSelectionMode() {
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        if (mActionBar != null) {
+        // transsion end
         if (mActionBar.getNavigationMode() == ActionBar.NAVIGATION_MODE_TABS
                 && mActivity.getViewPagerHelper() != null) {
+        	Log.w(TAG,"leaveSelectionMode ");
             mActivity.getViewPagerHelper().setHorizontalEnable(true);
         }
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        } else {
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            if (mActivity.getActionBar() == null) {
+            // transsion begin
+
+            // transsion begin, IB-02533, xieweiwei, modify, 2016.12.15
+            //if (FloatingActionBar.getInstance(mActivity).isTabActionBarShown() && mActivity.getViewPagerHelper() != null) {
+            if (getFloatingActionBar().isTabActionBarShown() && mActivity.getViewPagerHelper() != null) {
+            // transsion end
+                mActivity.getViewPagerHelper().setHorizontalEnable(true);
+            }
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            }
+            // transsion begin
+        }
+        // transsion end
     }
 
     public int getHeight() {
@@ -172,6 +330,13 @@ public class TabViewManager {
         return getHeight();
     }
 
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.19
+    // solve the problem of [TFS: 7394]
+    public void setCurrentTabIndexSimply(int tabIndex) {
+        mCurrentTabIndex = tabIndex;
+    }
+    // transsion end
+
     public void setCurrentTabIndex(int tabIndex) {
         if (tabIndex == mCurrentTabIndex) {
             return;
@@ -179,13 +344,25 @@ public class TabViewManager {
 
         mCurrentTabIndex = tabIndex;
 
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        if (mActionBar != null) {
+        // transsion end
         if (mActionBar.getNavigationMode() == ActionBar.NAVIGATION_MODE_TABS
                 && mActionBar.getSelectedNavigationIndex() != mCurrentTabIndex) {
             mActionBar.setSelectedNavigationItem(mCurrentTabIndex);
         }
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        }
+        // transsion end
 
         mActivity.getStateManager().setCurrentTabIndex(mCurrentTabIndex);
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.19
+        if (mActivity.getViewPagerHelper() != null) {
+        // transsion end
         mActivity.getViewPagerHelper().switchTo(mCurrentTabIndex);
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.19
+        }
+        // transsion end
     }
 
     private OnPageChangeListener mOnPageChangeListener = new OnPageChangeListener() {
@@ -249,5 +426,11 @@ public class TabViewManager {
             });
         }
     };
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.15
+    public FloatingActionBar getFloatingActionBar() {
+        return mActivity.getFloatingActionBar();
+    }
+    // transsion end
 }
 

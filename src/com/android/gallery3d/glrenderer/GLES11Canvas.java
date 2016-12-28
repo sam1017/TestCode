@@ -1011,7 +1011,8 @@ public class GLES11Canvas implements GLCanvas {
         return mGLId;
     }
 
-    public void clipRect(int left, int top, int right, int bottom) {
+    public boolean clipRect(int left, int top, int right, int bottom) {
+		return false;
     }    
 
 //********************************************************************

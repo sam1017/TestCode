@@ -71,6 +71,9 @@ import java.io.OutputStream;
 import java.util.TimeZone;
 
 
+// transsion beign, IB-02533, xieweiwei, add, 2016.11.17
+import com.mediatek.gallery3d.util.PermissionHelper;
+// transsion end
 
 /**
  * Activity for cropping an image.
@@ -229,6 +232,11 @@ public class CropActivity extends Activity {
      * Method that loads a bitmap in an async task.
      */
     private void startLoadBitmap(Uri uri) {
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.11.17
+        try {
+        // transsion end
+
         /// M: [BUG.MODIFY] @{
         /* if (uri != null) {*/
         boolean outOfDecodeSpec = DecodeSpecLimitor.isOutOfSpecLimit(getApplicationContext(), uri);
@@ -243,6 +251,31 @@ public class CropActivity extends Activity {
             cannotLoadImage();
             done();
         }
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.11.17
+        //<provider android:authorities="@string/photos_contentprovider_full_content_authority"
+        //        android:exported="false"
+        //        android:grantUriPermissions="true"
+        //        android:label="@string/media_content_provider_label"
+        //        android:name="com.google.android.apps.photos.contentprovider.MediaContentProvider"
+        //        android:syncable="false"/>
+        // because Google provider do not export permission "com.google.android.apps.photos.contentprovider.MediaContentProvider"
+        // we catch exception
+        //        "Caused by: java.lang.SecurityException: Permission Denial:
+        //         opening provider com.google.android.apps.photos.contentprovider.MediaContentProvider
+        //         from ProcessRecord{a072682 16469:com.android.gallery3d/u0a40}",
+        // if this happend, we popup toast "cannot load image" and finish
+        } catch (Exception e) {
+            boolean granted = PermissionHelper.checkForFilterShowVisitGoogleProvider(this);
+            if (!granted) {
+                CharSequence text = getString(R.string.cannot_load_image);
+                Toast toast = Toast.makeText(this, text, Toast.LENGTH_SHORT);
+                toast.show();
+                finish();
+            }
+        }
+        // transsion end
+
     }
 
     /**

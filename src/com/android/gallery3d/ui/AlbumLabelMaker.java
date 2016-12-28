@@ -26,7 +26,12 @@ import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.LinearGradient;
+import android.graphics.Paint;
+import android.graphics.Picture;
 import android.graphics.PorterDuff;
+import android.graphics.Shader.TileMode;
 import android.graphics.Typeface;
 import android.text.TextPaint;
 import android.text.TextUtils;
@@ -36,7 +41,6 @@ import com.android.gallery3d.data.DataSourceType;
 import com.android.photos.data.GalleryBitmapPool;
 import com.android.gallery3d.util.ThreadPool;
 import com.android.gallery3d.util.ThreadPool.JobContext;
-
 import com.mediatek.gallery3d.layout.FancyHelper;
 import com.mediatek.gallery3d.util.TraceHelper;
 
@@ -172,7 +176,8 @@ public class AlbumLabelMaker {
 
             String title = mTitle;
             String count = mCount;
-            Bitmap icon = getOverlayAlbumIcon(mSourceType);
+            //Bitmap icon = getOverlayAlbumIcon(mSourceType);
+            Bitmap icon = null;
 
             Bitmap bitmap = null;
             int labelWidth;
@@ -202,8 +207,14 @@ public class AlbumLabelMaker {
             canvas.clipRect(BORDER_SIZE, BORDER_SIZE,
                     bitmap.getWidth() - BORDER_SIZE,
                     bitmap.getHeight() - BORDER_SIZE);
-            canvas.drawColor(mSpec.backgroundColor, PorterDuff.Mode.SRC);
 
+            canvas.drawColor(mSpec.backgroundColor, PorterDuff.Mode.SRC);
+            //Paint p=new Paint();
+            //LinearGradient lg = new LinearGradient(0,0, 0, bitmap.getHeight(),0xCCFFFFFF,0xCC000000,TileMode.CLAMP);
+            //p.setShader(lg);
+            //canvas.drawRect(BORDER_SIZE, BORDER_SIZE,
+            //        bitmap.getWidth() - BORDER_SIZE,
+            //        bitmap.getHeight() - BORDER_SIZE, p);
             canvas.translate(BORDER_SIZE, BORDER_SIZE);
 
             // draw title
@@ -214,7 +225,8 @@ public class AlbumLabelMaker {
                 return null;
             }
             /// @}
-            int x = s.leftMargin + s.iconSize;
+            //int x = s.leftMargin + s.iconSize;
+            int x = s.leftMargin;
             // TODO: is the offset relevant in new reskin?
             // int y = s.titleOffset;
             int y = (s.labelBackgroundHeight - s.titleFontSize) / 2;
@@ -229,7 +241,7 @@ public class AlbumLabelMaker {
                 return null;
             }
             /// @}
-            x = labelWidth - s.titleRightMargin;
+            x = labelWidth - s.titleRightMargin - Math.min((int) Math.ceil(mTitlePaint.measureText(count)), mContext.getResources().getDimensionPixelSize(R.dimen.max_count_view));
             y = (s.labelBackgroundHeight - s.countFontSize) / 2;
             /// M: [FEATURE.MODIFY] fancy layout @{
             /*

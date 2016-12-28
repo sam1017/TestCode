@@ -81,7 +81,16 @@ public class ContainerLayer extends Layer {
             return;
         }
         ActionBar actionBar = mActivity.getActionBar();
+        // transsion begin, IB-02533, xieweiwei, modify, 2016.12.15
+        // solve the problem of [TFS: Task 7361]
+        if (mActivity.getActionBar() == null) {
+            mActionBarVisibility = true;
+        } else {
+        // transsion end
         mActionBarVisibility =  mActivity.getActionBar().isShowing();
+        // transsion begin, IB-02533, xieweiwei, modify, 2016.12.15
+        }
+        // transsion end
         mIsFilmMode = isFilmMode;
         updateLeftBottomIconVisibility();
     }

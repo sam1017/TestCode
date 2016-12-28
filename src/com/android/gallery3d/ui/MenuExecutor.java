@@ -36,7 +36,6 @@ import android.os.Message;
 import android.support.v4.print.PrintHelper;
 import android.view.Menu;
 import android.view.MenuItem;
-
 import android.widget.Toast;
 
 import com.android.gallery3d.R;
@@ -49,6 +48,7 @@ import com.android.gallery3d.data.MediaItem;
 import com.android.gallery3d.data.MediaObject;
 import com.android.gallery3d.data.MediaSet;
 import com.android.gallery3d.data.Path;
+import com.android.gallery3d.filtershow.FilterShowActivity;
 import com.android.gallery3d.filtershow.crop.CropActivity;
 import com.android.gallery3d.util.Future;
 import com.android.gallery3d.util.GalleryUtils;
@@ -247,6 +247,9 @@ public class MenuExecutor {
     /// @}
 
     public static void updateMenuOperation(Menu menu, int supported) {
+    	//Xiaoyh add for add select all icon at 2016/11/22
+		boolean supportselectall = true;
+    	//End
         boolean supportDelete = (supported & MediaObject.SUPPORT_DELETE) != 0;
         boolean supportRotate = (supported & MediaObject.SUPPORT_ROTATE) != 0;
         boolean supportCrop = (supported & MediaObject.SUPPORT_CROP) != 0;
@@ -272,8 +275,12 @@ public class MenuExecutor {
             FeatureConfig.SUPPORT_BLUETOOTH_PRINT;
         /// @}
 
-        supportPrint &= PrintHelper.systemSupportsPrint();
+        boolean supportfunny = (supported & MediaObject.SUPPORT_FUNNY) != 0;
 
+        supportPrint &= PrintHelper.systemSupportsPrint();
+        //Xiaoyh add for add select all icon at 2016/11/22
+		setMenuItemVisible(menu, R.id.action_select_all, supportselectall);
+        //End
         /// M: [BUG.ADD] add for Bluetooth Print feature@{
         setMenuItemVisible(menu, R.id.action_print, supportBTPrint);
         /// @}
@@ -300,6 +307,7 @@ public class MenuExecutor {
         // add for exporting motion track media
         setMenuItemVisible(menu, R.id.action_export, supportExport);
         /// @}
+        setMenuItemVisible(menu, R.id.photopage_funny, supportfunny);
 
     }
 
@@ -359,6 +367,7 @@ public class MenuExecutor {
                                 | Intent.FLAG_ACTIVITY_CLEAR_TOP
                                 | Intent.FLAG_ACTIVITY_NEW_TASK);
                 /// @}
+                intent.putExtra(FilterShowActivity.NEED_SAVE_AS, true);
                 ((Activity) mActivity).startActivity(Intent.createChooser(intent, null));
                 return;
             }
@@ -449,7 +458,6 @@ public class MenuExecutor {
     public void onMenuClicked(MenuItem menuItem, String confirmMsg,
             final ProgressListener listener) {
         final int action = menuItem.getItemId();
-
         if (confirmMsg != null) {
             if (listener != null) listener.onConfirmDialogShown();
             ConfirmDialogListener cdl = new ConfirmDialogListener(action, listener);
@@ -463,6 +471,25 @@ public class MenuExecutor {
             onMenuClicked(action, listener);
         }
     }
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.22
+    public void onMenuClicked(int actionId, String confirmMsg,
+        final ProgressListener listener) {
+        final int action = actionId;
+        if (confirmMsg != null) {
+            if (listener != null) listener.onConfirmDialogShown();
+            ConfirmDialogListener cdl = new ConfirmDialogListener(action, listener);
+            new AlertDialog.Builder(mActivity.getAndroidContext())
+                    .setMessage(confirmMsg)
+                    .setOnCancelListener(cdl)
+                    .setPositiveButton(R.string.ok, cdl)
+                    .setNegativeButton(R.string.cancel, cdl)
+                    .create().show();
+        } else {
+            onMenuClicked(action, listener);
+        }
+    }
+    // transsion end
 
     public void startAction(int action, int title, ProgressListener listener) {
         startAction(action, title, listener, false, true);

@@ -41,12 +41,36 @@ public abstract class AbstractSlotRenderer implements SlotView.SlotRenderer {
     private final NinePatchTexture mFrameSelected;
     private FadeOutTexture mFramePressedUp;
 
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.12
+    private final ResourceTexture mSelectionIcon;
+    private int mSelectionIconWidth;
+    private int mSelectionIconHeight;
+    private int mSelectionIconPaddingRight;
+    private int mSelectionIconPaddingBottom;
+    // transsion end
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.19
+    private int mSelectionIconPaddingTop;
+    // transsion end
+
     protected AbstractSlotRenderer(Context context) {
         mVideoOverlay = new ResourceTexture(context, R.drawable.ic_video_thumb);
         mVideoPlayIcon = new ResourceTexture(context, R.drawable.ic_gallery_play);
         mPanoramaIcon = new ResourceTexture(context, R.drawable.ic_360pano_holo_light);
         mFramePressed = new NinePatchTexture(context, R.drawable.grid_pressed);
         mFrameSelected = new NinePatchTexture(context, R.drawable.grid_selected);
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.12
+        mSelectionIcon = new ResourceTexture(context, R.drawable.grid_view_select);
+        mSelectionIconWidth = (int)context.getResources().getDimension(R.dimen.grid_view_select_icon_width);
+        mSelectionIconHeight = (int)context.getResources().getDimension(R.dimen.grid_view_select_icon_height);
+        mSelectionIconPaddingRight = (int)context.getResources().getDimension(R.dimen.grid_view_select_icon_paddingright);
+        mSelectionIconPaddingBottom = (int)context.getResources().getDimension(R.dimen.grid_view_select_icon_paddingbottom);
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.19
+        mSelectionIconPaddingTop = (int)context.getResources().getDimension(R.dimen.grid_view_select_icon_paddingtop);
+        // transsion end
     }
 
     protected void drawContent(GLCanvas canvas,
@@ -144,15 +168,34 @@ public abstract class AbstractSlotRenderer implements SlotView.SlotRenderer {
         if (mFramePressedUp == null) {
             mFramePressedUp = new FadeOutTexture(mFramePressed);
         }
-        drawFrame(canvas, mFramePressed.getPaddings(), mFramePressedUp, 0, 0, width, height);
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.12
+        //drawFrame(canvas, mFramePressed.getPaddings(), mFramePressedUp, 0, 0, width, height);
+        // transsion end
     }
 
     protected void drawPressedFrame(GLCanvas canvas, int width, int height) {
-        drawFrame(canvas, mFramePressed.getPaddings(), mFramePressed, 0, 0, width, height);
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.12
+        //drawFrame(canvas, mFramePressed.getPaddings(), mFramePressed, 0, 0, width, height);
+        // transsion end
     }
 
     protected void drawSelectedFrame(GLCanvas canvas, int width, int height) {
-        drawFrame(canvas, mFrameSelected.getPaddings(), mFrameSelected, 0, 0, width, height);
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.12
+        //drawFrame(canvas, mFrameSelected.getPaddings(), mFrameSelected, 0, 0, width, height);
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei. delete, 2016.12.19
+        //// transsion begin, IB-02533, xieweiwei, add, 2016.12.12
+        //mSelectionIcon.draw(canvas, width - mSelectionIconPaddingRight, height - mSelectionIconPaddingBottom,
+        //        mSelectionIconWidth, mSelectionIconHeight);
+        //// transsion end
+        // transsion end
+
+        // transsion beign, IB-02533, xieweiwei, add, 2016.12.19
+        mSelectionIcon.draw(canvas, width - mSelectionIconPaddingRight, mSelectionIconPaddingTop,
+                mSelectionIconWidth, mSelectionIconHeight);
+        // transsion end
+
     }
 
     protected static void drawFrame(GLCanvas canvas, Rect padding, Texture frame,

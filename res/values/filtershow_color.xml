@@ -22,7 +22,10 @@
     <color name="text_toolbar">#FFFFFF</color>
     <color name="background_screen">#101010</color>
     <color name="background_toolbar">#363949</color>
-    <color name="background_main_toolbar">#232323</color>
+    <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.12.26 -->
+    <!-- <color name="background_main_toolbar">#232323</color> -->
+    <color name="background_main_toolbar">#ffffffff</color>
+    <!-- transsion end -->
     <color name="toolbar_separation_line">#333333</color>
     <color name="slider_dot_color">#646464</color>
     <color name="slider_line_color">#888888</color>
@@ -35,9 +38,18 @@
     <color name="filtershow_stateview_text">#FFFFFF</color>
     <color name="filtershow_stateview_selected_background">#c8c8c8</color>
     <color name="filtershow_stateview_selected_text">#000000</color>
-    <color name="filtershow_categoryview_background">#1a1a1a</color>
-    <color name="filtershow_categoryview_text">#a7a7a7</color>
-    <color name="filtershow_category_selection">#ffffffff</color>
+    <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.12.27 -->
+    <!-- <color name="filtershow_categoryview_background">#1a1a1a</color> -->
+    <color name="filtershow_categoryview_background">#282828</color>
+    <!-- transsion end -->
+    <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.12.26 -->
+    <!-- <color name="filtershow_categoryview_text">#a7a7a7</color> -->
+    <color name="filtershow_categoryview_text">#ffffffff</color>
+    <!-- transsion end -->
+    <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.12.26 -->
+    <!-- <color name="filtershow_category_selection">#ffffffff</color> -->
+    <color name="filtershow_category_selection">#ffc600</color>
+    <!-- transsion end -->
     <color name="gradcontrol_point_center">#ffffffff</color>
     <color name="gradcontrol_point_edge">#ffffffff</color>
     <color name="gradcontrol_graypoint_center">#888888</color>
@@ -49,5 +61,16 @@
     <color name="draw_rect_border">#888888</color>
     <color name="color_chooser_unslected_border">#00000000</color>
     <color name="color_chooser_slected_border">#a7a7a7</color>
+    <color name="filtershow_textview_disable_color">#8d8d8d</color>
+    <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.12.27 -->
+    <!-- <color name="filtershow_textview_enable_color">#712424</color> -->
+    <color name="filtershow_textview_enable_color">#343434</color>
+    <!-- transsion end -->
+    <color name="filtershow_main_background_color">#333333</color>
+
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.26 -->
+    <color name="filtershow_text_selected_color">#ffc600</color>
+    <color name="filtershow_text_unselected_color">#3f161823</color>
+    <!-- transsion end -->
 
 </resources>

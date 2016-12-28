@@ -208,7 +208,7 @@ public class GalleryActionBar implements OnNavigationListener {
         mContext = activity.getAndroidContext();
         mActivity = activity;
 		/* -- add by liangchangwei 2016-9-8- modify ActionBar Background---*/
-		mActionBar.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.action_bar_background));
+		//mActionBar.setBackgroundDrawable(mContext.getResources().getDrawable(R.drawable.action_bar_background));
         mInflater = ((Activity) mActivity).getLayoutInflater();
         mCurrentIndex = 0;
     }
@@ -563,4 +563,11 @@ public class GalleryActionBar implements OnNavigationListener {
     }
 
     ActivityChooserModel.OnChooseActivityListener mOnChooseActivityListener;
+
+	public void setDisplayHomeAsUpEnabled(boolean flag) {
+		// TODO Auto-generated method stub
+        if (mActionBar != null) {
+            mActionBar.setDisplayHomeAsUpEnabled(flag);
+        }
+	}
 }

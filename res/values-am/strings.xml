@@ -438,4 +438,23 @@
   </plurals>
     <string name="stop">"አቁም"</string>
     <string name="loop">"የመዘዋወር ደም"</string>
+	
+    <string name="current_week_sunday">"እሁድ"</string>
+    <string name="current_week_monday">"ሰኞ"</string>
+    <string name="current_week_tuesday">"ማክሰኞ"</string>
+    <string name="current_week_wednesday">"ረቡዕ"</string>
+    <string name="current_week_thursday">"ሐሙስ"</string>
+    <string name="current_week_friday">"ዓርብ"</string>
+    <string name="current_week_saturday">"ቅዳሜ"</string>
+    <string name="last_week_sunday">"ያለፈው እሁድ"</string>
+    <string name="last_week_monday">"ያለፈው ሰኞ"</string>
+    <string name="last_week_tuesday">"ያለፈው ማክሰኞ"</string>
+    <string name="last_week_wednesday">"ያለፈው ረቡዕ"</string>
+    <string name="last_week_thursday">"ያለፈው ሐሙስ"</string>
+    <string name="last_week_friday">"ያለፈው ዓርብ"</string>
+    <string name="last_week_saturday">"ያለፈው ቅዳሜ"</string>
+	<string name="today">ዛሬ</string>
+    <string name="yesterday">ትናንት</string>
+
+    <string name="action_funny">ዝነኛ</string>
 </resources>

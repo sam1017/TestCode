@@ -146,7 +146,7 @@ public class GLViewPager extends GLView {
     protected void render(GLCanvas canvas) {
         canvas.fillRect(0, 0, getWidth(), getHeight(), mDefaultBackground);
 
-        Log.w(TAG,"render mHorizontalEnable = " + mHorizontalEnable);
+        if(DEBUG) Log.w(TAG,"render mHorizontalEnable = " + mHorizontalEnable);
         if (mHorizontalEnable) {
             boolean more = mScroller.computeScrollOffset();
             int scrollX = mScroller.getCurrX();
@@ -196,6 +196,7 @@ public class GLViewPager extends GLView {
         int Xoffset = -scrollX + index * getWidth();
         canvas.save(GLCanvas.SAVE_FLAG_ALL);
         canvas.translate(Xoffset, 0);
+		Log.d(TAG,"renderVisibleItem index = " + index + " Xoffset = " + Xoffset);
         canvas.clipRect(0, 0, getWidth(), getHeight());
         mGlViews[index].render(canvas);
         canvas.restore();
@@ -478,7 +479,7 @@ public class GLViewPager extends GLView {
     }
 
     // the next codes, see more in android.support.v4.view.ViewPager
-    private static final boolean DEBUG = true;
+    private static final boolean DEBUG = false;
     private VelocityTracker mVelocityTracker;
     private int mMinimumVelocity;
     private int mMaximumVelocity;

@@ -118,10 +118,12 @@ public abstract class MUploadedTexture extends MBasicTexture {
     private Bitmap getBitmap() {
         if (mBitmap == null) {
             mBitmap = onGetBitmap();
-            int w = mBitmap.getWidth() + mBorder * 2;
-            int h = mBitmap.getHeight() + mBorder * 2;
-            if (mWidth == UNSPECIFIED) {
-                setSize(w, h);
+            if(mBitmap != null){
+                int w = mBitmap.getWidth() + mBorder * 2;
+                int h = mBitmap.getHeight() + mBorder * 2;
+                if (mWidth == UNSPECIFIED) {
+                    setSize(w, h);
+                }
             }
         }
         return mBitmap;

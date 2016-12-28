@@ -17,4 +17,8 @@
             android:layout_alignParentRight="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.08 -->
+    <include layout="@layout/floating_actionbar"/>
+    <!-- transsion end -->
+
 </RelativeLayout>

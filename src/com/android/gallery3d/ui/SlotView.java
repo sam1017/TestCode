@@ -691,7 +691,7 @@ public class SlotView extends GLView implements Layout.DataChangeListener {
             // Then calculate how many columns we need for all slots.
             int count = ((mSlotCount + mUnitCount - 1) / mUnitCount);
             mContentLength = count * majorUnitSize + (count - 1) * mSlotGap;
-
+            mContentLength += 114;
             // If the content length is less then the screen width, put
             // extra padding in left and right.
             //padding[1] = Math.max(0, (majorLength - mContentLength) / 2);

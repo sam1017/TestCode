@@ -28,7 +28,7 @@ public class TimerSlotView extends GLView {
     private final VelocityHelper mVelocityHelper;
     private static final int INDEX_NONE = -1;
 	private static final boolean WIDE = false;
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 	private static final String TAG = "TimerSlotView";
     public static final int OVERSCROLL_3D = 0;
     public static final int OVERSCROLL_SYSTEM = 1;

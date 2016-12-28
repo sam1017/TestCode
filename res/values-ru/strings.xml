@@ -441,4 +441,22 @@
         <item quantity="one">Выбран элемент %1$d</item>
         <item quantity="other">Выбраны элементы %1$d</item>
     </plurals>
+    <string name="current_week_sunday">"Воскресенье"</string>
+    <string name="current_week_monday">"понедельник"</string>
+    <string name="current_week_tuesday">"вторник"</string>
+    <string name="current_week_wednesday">"среда"</string>
+    <string name="current_week_thursday">"Четверг"</string>
+    <string name="current_week_friday">"пятница"</string>
+    <string name="current_week_saturday">"суббота"</string>
+    <string name="last_week_sunday">"В воскресенье"</string>
+    <string name="last_week_monday">"В прошлый понедельник"</string>
+    <string name="last_week_tuesday">"во вторник"</string>
+    <string name="last_week_wednesday">"В прошлую среду"</string>
+    <string name="last_week_thursday">"в четверг"</string>
+    <string name="last_week_friday">"в пятницу"</string>
+    <string name="last_week_saturday">"В субботу"</string>
+	<string name="today">Cегодня</string>
+    <string name="yesterday">Вчера</string>
+
+    <string name="action_funny">знаменитость</string>
 </resources>

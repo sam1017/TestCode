@@ -23,12 +23,20 @@ package com.android.gallery3d.app;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Rect;
+import android.media.MediaScannerConnection;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.MediaStore;
+import android.provider.MediaStore.Images.ImageColumns;
 import android.util.DisplayMetrics;
 import android.view.HapticFeedbackConstants;
 import android.view.Menu;
@@ -71,8 +79,18 @@ import com.mediatek.gallery3d.layout.FancyHelper;
 import com.mediatek.gallery3d.layout.Layout.DataChangeListener;
 import com.mediatek.gallery3d.util.PermissionHelper;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+
+// transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+import com.transsion.gallery3d.ui.FloatingActionBar;
+// transsion end
 
 /// M: [BUG.MODIFY] leave selection mode when plug out sdcard @{
 /*
@@ -80,15 +98,29 @@ public class AlbumSetPage extends ActivityState implements
         SelectionManager.SelectionListener, GalleryActionBar.ClusterRunner,
         EyePosition.EyePositionListener, MediaSet.SyncListener {
 */
+// transsion begin, IB-02533, xieweiwei, modify, 2016.11.21
+//public class AlbumSetPage extends ActivityState implements
+//        SelectionManager.SelectionListener, GalleryActionBar.ClusterRunner,
+//        EyePosition.EyePositionListener, MediaSet.SyncListener,
+//        AbstractGalleryActivity.EjectListener {
 public class AlbumSetPage extends ActivityState implements
         SelectionManager.SelectionListener, GalleryActionBar.ClusterRunner,
         EyePosition.EyePositionListener, MediaSet.SyncListener,
-        AbstractGalleryActivity.EjectListener {
+        AbstractGalleryActivity.EjectListener,
+        CustomBottomControls.Delegate {
+// transsion end
 /// @}
     @SuppressWarnings("unused")
     private static final String TAG = "Gallery2/AlbumSetPage";
 
     private static final int MSG_PICK_ALBUM = 1;
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.06
+    private static final int MSG_UPDATE_OPTION_MENU = 2;
+    // transsion end
+
+    // transsion beign, IB-02533, xieweiwei, add, 2016.12.14
+    private static final int MSG_ON_BACK_PRESSS = 3;
+    // transsion end
 
     public static final String KEY_MEDIA_PATH = "media-path";
     public static final String KEY_SET_TITLE = "set-title";
@@ -97,6 +129,7 @@ public class AlbumSetPage extends ActivityState implements
 
     private static final int DATA_CACHE_SIZE = 256;
     private static final int REQUEST_DO_ANIMATION = 1;
+    private static final int RESULT_COYP_IMAGE = 2;
 
     private static final int BIT_LOADING_RELOAD = 1;
     private static final int BIT_LOADING_SYNC = 2;
@@ -124,6 +157,8 @@ public class AlbumSetPage extends ActivityState implements
     private boolean mShowDetails;
     private EyePosition mEyePosition;
     private Handler mHandler;
+    private ProgressDialog mProgressDialog = null;
+    ArrayList<Uri> uris = new ArrayList<Uri>();
 
     // The eyes' position of the user, the origin is at the center of the
     // device and the unit is in pixels.
@@ -140,12 +175,31 @@ public class AlbumSetPage extends ActivityState implements
     private boolean mShowedEmptyToastForSelf = false;
     /// M: [BUG.ADD]  if get the mTitle/mSubTitle,they will not change when switch language@{
     private int mClusterType = -1;
+    private int slotViewTop = 0;
+    private String mCopyFilePath = null;
+    private String fileName = null;
     /// @}
 
     /// M: [PERF.ADD] for performance auto test@{
     public boolean mLoadingFinished = false;
     public boolean mInitialized = false;
     /// @}
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.21
+    private CustomBottomControls mBottomControls;
+    // transsion end
+
+    // transsion begin, IB-02533, xieweiwei. add, 2016.11.30
+    private Bundle mBundle = null;
+    // transsion end
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.12
+    public FloatingActionBar mFloatingActionBar;
+    // transsion end
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.23
+    public int mGroupId;
+    // transsion end
 
     @Override
     protected int getBackgroundColorId() {
@@ -160,7 +214,9 @@ public class AlbumSetPage extends ActivityState implements
                 boolean changed, int left, int top, int right, int bottom) {
             mEyePosition.resetPosition();
 
-            int slotViewTop = mActionBar.getHeight() + mConfig.paddingTop;
+            if(slotViewTop == 0){
+                slotViewTop = mActionBar.getHeight() + mConfig.paddingTop;
+            }
             int slotViewBottom = bottom - top - mConfig.paddingBottom;
             int slotViewRight = right - left;
 
@@ -215,6 +271,13 @@ public class AlbumSetPage extends ActivityState implements
 
     @Override
     public void onBackPressed() {
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+        if (!mHasDoResume) {
+            return;
+        }
+        // transsion end
+
         if (mShowDetails) {
             hideDetails();
         } else if (mSelectionManager.inSelectionMode()) {
@@ -323,11 +386,11 @@ public class AlbumSetPage extends ActivityState implements
         hideEmptyAlbumToast();
 
         String mediaPath = targetSet.getPath().toString();
-
         Bundle data = new Bundle(getData());
         int[] center = new int[2];
         getSlotCenter(slotIndex, center);
         data.putIntArray(AlbumPage.KEY_SET_CENTER, center);
+        data.putInt(GalleryActivity.KEY_ACTION_FLAG, ActivityState.ACTION_FLAG_STANDARD);
         if (mGetAlbum && targetSet.isLeafAlbum()) {
             Activity activity = mActivity;
             Intent result = new Intent()
@@ -362,6 +425,7 @@ public class AlbumSetPage extends ActivityState implements
             // We only show cluster menu in the first AlbumPage in stack
             boolean inAlbum = mActivity.getStateManager().hasStateClass(AlbumPage.class);
             data.putBoolean(AlbumPage.KEY_SHOW_CLUSTER_MENU, !inAlbum);
+            Log.w(TAG,"pickAlbum index = " + slotIndex + " inAlbum = " + inAlbum + " mGetContent = " + mGetContent + " data = " + data) ;
             mActivity.getStateManager().startStateForResult(
                     AlbumPage.class, REQUEST_DO_ANIMATION, data);
         }
@@ -423,6 +487,32 @@ public class AlbumSetPage extends ActivityState implements
     @Override
     public void onCreate(Bundle data, Bundle restoreState) {
         super.onCreate(data, restoreState);
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+        // do create function later in onResume process
+        mBundle = data;
+        mGetContent = data.getBoolean(GalleryActivity.KEY_GET_CONTENT, false);
+        mActionBar = mActivity.getGalleryActionBar();
+        // transsion begin, IB-02533, xiewiwei, delete, 2016.12.01
+        //// transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+        //doCreate();
+        //mHasDoCreate = true;
+        //// transsion end
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        if (mActivity.getActionBar() == null) {
+            doCreate();
+            mHasDoCreate = true;
+        }
+        // transsion end
+    }
+
+    // implements doCreate function in base class
+    protected void doCreate() {
+        Bundle data = mBundle;
+    // transsion end
+
         initializeViews();
         initializeData(data);
 
@@ -430,7 +520,6 @@ public class AlbumSetPage extends ActivityState implements
         mInitialized = true;
         /// @}
         Context context = mActivity.getAndroidContext();
-        mGetContent = data.getBoolean(GalleryActivity.KEY_GET_CONTENT, false);
         mGetAlbum = data.getBoolean(GalleryActivity.KEY_GET_ALBUM, false);
         mTitle = data.getString(AlbumSetPage.KEY_SET_TITLE);
         /// M: [BUG.MODIFY] @{
@@ -441,7 +530,10 @@ public class AlbumSetPage extends ActivityState implements
         /// @}
         mEyePosition = new EyePosition(context, this);
         mDetailsSource = new MyDetailsSource();
-        mActionBar = mActivity.getGalleryActionBar();
+        // transsion begin, IB-02533, xieweiwei, modify, 2016.12.12
+        //slotViewTop = 112 + mConfig.paddingTop;
+        slotViewTop = (int)mActivity.getResources().getDimension(R.dimen.floating_actionbar_height) + mConfig.paddingTop;
+        // transsion end
         /// M: [FEATURE.ADD] fancy layout @{
         if (mSlotView != null) {
             mSlotView.setActionBar(mActionBar);
@@ -458,17 +550,56 @@ public class AlbumSetPage extends ActivityState implements
                         pickAlbum(message.arg1);
                         break;
                     }
+
+                    // transsion begin, IB-02533, xieweiwei, add, 2016.12.06
+                    case MSG_UPDATE_OPTION_MENU:
+                        updateActionBar();
+                        break;
+                    // transsion end
+
+                    // transsion begin, IB-02533, xieweiwei, add, 2016.12.14
+                    case MSG_ON_BACK_PRESSS:
+                        onBackPressed();
+                        break;
+                    // transsion end
+
                     default: throw new AssertionError(message.what);
                 }
             }
         };
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.11.21
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.11.21
+        //RelativeLayout galleryRoot = (RelativeLayout) ((Activity) mActivity)
+        //        .findViewById(R.id.gallery_root);
+        //mBottomControls = new CustomBottomControls(this, mActivity, galleryRoot);
+        //if (mBottomControls != null) {
+        //    mBottomControls.hide();
+        //}
+        // transsion end
+        // transsion end
+
     }
 
     @Override
     public void onDestroy() {
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+        if (!mHasDoResume) {
+            return;
+        }
+        // transsion end
+
         super.onDestroy();
         cleanupCameraButton();
         mActionModeHandler.destroy();
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.11.21
+        if (mBottomControls != null) {
+            mBottomControls.cleanup();
+        }
+        // transsion end
+
     }
 
     private boolean setupCameraButton() {
@@ -530,7 +661,7 @@ public class AlbumSetPage extends ActivityState implements
                     mShowedEmptyToastForSelf = true;
                     showEmptyAlbumToast(Toast.LENGTH_LONG);
                     mSlotView.invalidate();
-                    showCameraButton();
+                    //showCameraButton();
                 }
                 return;
             }
@@ -551,6 +682,17 @@ public class AlbumSetPage extends ActivityState implements
 
     @Override
     public void onPause() {
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+        if (!mHasDoResume) {
+            return;
+        }
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.07
+        mHandler.removeMessages(0);
+        // transsion end
+
         super.onPause();
         /// M: [BUG.ADD] when user exits from current page, UpdateContent() in data loader may
         // be executed in main handler, it may cause seldom JE. @{
@@ -588,6 +730,66 @@ public class AlbumSetPage extends ActivityState implements
     @Override
     public void onResume() {
         super.onResume();
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.12
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.16
+        //onCreateActionBarHelp();
+        // transsion end
+        // transsion end
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.01
+        //// send message to base class to do create and resume function
+        //// transsion begin, IB-02533, xieweiwei, modify, 2016.11.30
+        ////delayDoResume();
+        //doResume();
+        //mHasDoResume = true;
+        //// transsion end
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        if (mActivity.getActionBar() != null) {
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.01
+        delayDoResume();
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        } else {
+            doResume();
+            mHasDoResume = true;
+        }
+        // transsion end
+
+    }
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.12
+    public FloatingActionBar getFloatingActionBar() {
+        // transsion begin, IB-02533, xieweiwei, modify, 2016.12.16
+        //if (mFloatingActionBar == null) {
+        //    mFloatingActionBar = new FloatingActionBar(mActivity, true);
+        //}
+        //return mFloatingActionBar;
+        return mActivity.getFloatingActionBar();
+        // transsion end
+    }
+    // transsion end
+
+    // implements doResume function in base class
+    protected void doResume() {
+    // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+        if (mActivity.getActionBar() == null) {
+            onCreateActionBarHelp();
+        }
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.13
+        showStateBar();
+        // transsion end
+
         /// M: [BUG.ADD] when user exits from current page, UpdateContent() in data loader may
         // be executed in main handler, it may cause seldom JE. @{
         if (FancyHelper.isFancyLayoutSupported() && mAlbumSetDataAdapter != null) {
@@ -596,7 +798,14 @@ public class AlbumSetPage extends ActivityState implements
         }
         /// @}
         mIsActive = true;
-        setContentPane(mRootPane);
+        // transsion begin, IB-02533, xieweiwei, modify, 2016.12.19
+        //setContentPane(mRootPane);
+        if (mGetContent || mGetAlbum) {
+            setContentPane(mRootPane);
+        } else {
+            setTabContentPane(mRootPane);
+        }
+        // transsion end
 
         // Set the reload bit here to prevent it exit this page in clearLoadingBit().
         setLoadingBit(BIT_LOADING_RELOAD);
@@ -605,9 +814,57 @@ public class AlbumSetPage extends ActivityState implements
             mNeedUpdateSelection = true;
             // set mRestoreSelectionDone as false if we need to restore selection
             mRestoreSelectionDone = false;
+            // transsion begin, IB-02533, xieweiwei, modify, 2016.12.08
+            //hideCameraView();
+            hideNewFolderView();
+            // transsion end
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            if (mActivity.getTabViewManager() != null) {
+            // transsion end
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+            if (mActivity.getTabViewManager().getCurrentTabIndex() == 1 && !mGetContent) {
+                getFloatingActionBar().showSelectionModeActionBar();
+            }
+            // transsion end
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            }
+            // transsion end
+
         } else {
             // set mRestoreSelectionDone as true there is no need to restore selection
             mRestoreSelectionDone = true;
+            if(isUpdateMenuEnable()){
+
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.21
+                if (mData != null && mData.getBoolean(
+                    GalleryActivity.KEY_NEW_FOLDER_ICON, false)) {
+                    mNewFolderImageView = null;
+                }
+                // transsion end
+
+                // transsion begin, IB-02533, xieweiwei, modify, 2016.12.08
+                //showCameraView();
+                showNewFolderView();
+                // transsion end
+            }
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            if (mActivity.getTabViewManager() != null) {
+            // transsion end
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+            if (mActivity.getTabViewManager().getCurrentTabIndex() == 1 && !mGetContent) {
+                getFloatingActionBar().showTabActionBar();
+            }
+            // transsion end
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            }
+            // transsion end
+
         }
         /// @}
         mAlbumSetDataAdapter.resume();
@@ -692,7 +949,11 @@ public class AlbumSetPage extends ActivityState implements
             }
         });
 
-        mActionModeHandler = new ActionModeHandler(mActivity, mSelectionManager);
+        // transsion begin, IB-02533, xieweiwei, modify, 2016.11.21
+        //mActionModeHandler = new ActionModeHandler(mActivity, mSelectionManager);
+        mActionModeHandler = new ActionModeHandler(mActivity, mSelectionManager, this);
+        // transsion end
+
         mActionModeHandler.setActionModeListener(new ActionModeListener() {
             @Override
             public boolean onActionItemClicked(MenuItem item) {
@@ -708,10 +969,44 @@ public class AlbumSetPage extends ActivityState implements
         mRootPane.addComponent(mSlotView);
     }
 
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.13
+    public boolean onCreateActionBarHelp() {
+        if(!mGetContent){
+            return true;
+        }
+        final boolean inAlbum = mActivity.getStateManager().hasStateClass(AlbumPage.class);
+        if (mGetContent) {
+            int typeBits = mData.getInt(
+                    GalleryActivity.KEY_TYPE_BITS, DataManager.INCLUDE_IMAGE);
+            getFloatingActionBar().initCluster(mClusterListener);
+            getFloatingActionBar().setClusterTitle(mActivity.getResources().getString(GalleryUtils.getSelectionModePrompt(typeBits)));
+            getFloatingActionBar().showClusterActionBar();
+        } else if (mGetAlbum) {
+            getFloatingActionBar().initCluster(mClusterListener);
+            getFloatingActionBar().setStandantTitle(mActivity.getResources().getString(R.string.select_album));
+            getFloatingActionBar().showClusterActionBar();
+        }
+        return true;
+    }
+    // transsion end
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.12
+    public FloatingActionBar.ClusterButtonClickListener mClusterListener = new FloatingActionBar.ClusterButtonClickListener() {
+            public boolean onClusterBack() {
+                mHandler.obtainMessage(MSG_ON_BACK_PRESSS).sendToTarget();
+                return true;
+            }
+            public void onClusterModeClick(int mode) {
+            }
+    };
+    // transsion end
+
     @Override
     protected boolean onCreateActionBar(Menu menu) {
-        return true;
-    	/*
+        if(!mGetContent){
+            return true;
+        }
+//        return true;
         Activity activity = mActivity;
         final boolean inAlbum = mActivity.getStateManager().hasStateClass(AlbumPage.class);
         MenuInflater inflater = getSupportMenuInflater();
@@ -721,6 +1016,7 @@ public class AlbumSetPage extends ActivityState implements
             int typeBits = mData.getInt(
                     GalleryActivity.KEY_TYPE_BITS, DataManager.INCLUDE_IMAGE);
             mActionBar.setTitle(GalleryUtils.getSelectionModePrompt(typeBits));
+            mActionBar.setDisplayHomeAsUpEnabled(false);
         } else  if (mGetAlbum) {
             inflater.inflate(R.menu.pickup, menu);
             mActionBar.setTitle(R.string.select_album);
@@ -770,7 +1066,6 @@ public class AlbumSetPage extends ActivityState implements
             }
         }
         return true;
-        */
     }
 
     @Override
@@ -836,7 +1131,117 @@ public class AlbumSetPage extends ActivityState implements
         switch (requestCode) {
             case REQUEST_DO_ANIMATION: {
                 mSlotView.startRisingAnimation();
+                break;
             }
+            case RESULT_COYP_IMAGE:{
+                //Path photoPath = mActivity.getDataManager().findPathByUri(data.getData(),
+                //data.getType());
+                Log.w(TAG, "data = " + data);
+                Uri uri = null;
+                if(data != null && data.getAction() != null){
+                    Log.w(TAG,"data.getData() = " + data.getData());
+                    Log.w(TAG,"data.getAction() = " + data.getAction());
+                    if(uris != null){
+                        uris.clear();
+                    }
+                    if(Intent.ACTION_SEND_MULTIPLE.equals(data.getAction())){
+                        uris = data.getParcelableArrayListExtra(Intent.EXTRA_STREAM);
+                        Log.w(TAG,"ACTION_SEND_MULTIPLE uris = " + uris);
+                    }else if(Intent.ACTION_SEND.equals(data.getAction())){
+                        uri = (Uri)(data.getExtra(Intent.EXTRA_STREAM));
+                        Log.w(TAG,"ACTION_SEND uri = " + uri);
+                    }
+                    File dir = new File(mCopyFilePath);
+                    if (!dir.exists()){
+                         Log.d(TAG, "dir not exit,will create this, path = " + mCopyFilePath);
+                         dir.mkdirs();
+                    }
+                    if(uri != null){
+                        // transsion begin, IB-02533, xieweiwei, add, 2016.12.23
+                        ArrayList<String> shotPaths = new ArrayList<String>();
+                        // transsion end
+                        String resPath = getRealPathFromUri(mActivity, uri);
+                        Log.w(TAG,"resPath = " + resPath + " mCopyFilePath = " + mCopyFilePath + " fileName = " + fileName);
+                        copyFile(resPath, mCopyFilePath + "/" + fileName);
+                        String[] paths = new String[1];
+                        paths[0] = mCopyFilePath + "/" + fileName;
+                        // transsion begin, IB-02533, xieweiwei, add, 2016.12.23
+                        if (isConshotPicByDatabase(mActivity, uri)) {
+                            copyConshotImageByDatabase(mActivity, uri, shotPaths, mGroupId, resPath, mCopyFilePath);
+                        }
+                        if (shotPaths.size() > 0) {
+                            String[] comPaths = new String[paths.length + shotPaths.size()];
+                            for (int i = 0; i < paths.length; i++) {
+                                comPaths[i] = paths[i];
+                                Log.w(TAG,"comPaths[i] = " + comPaths[i] + " i = " + i);
+                            }
+                            for (int j = 0; j < shotPaths.size(); j++) {
+                                comPaths[paths.length + j] = shotPaths.get(j);
+                                Log.w(TAG,"comPaths[paths.length + j] = " + comPaths[paths.length + j] + " i = " + (paths.length + j));
+                            }
+                            MediaScannerConnection.scanFile(mActivity, comPaths, null, null);
+                        } else {
+                        // transsion end
+                        MediaScannerConnection.scanFile(mActivity, paths, null, null);
+                        // transsion begin, IB-02533, xieweiwei, add, 2016.12.23
+                        }
+                        // transsion end
+                        mCopyFilePath = null;
+                    }else if(uris.size() > 1){
+                        new copyFilesAsync().execute();
+                        /*
+                        String[] paths = new String[uris.size()];
+                        for(int i = 0; i < uris.size(); i++){
+                            String resPath = getRealPathFromUri(mActivity, uris.get(i));
+                            Log.w(TAG,"resPath = " + resPath + " mCopyFilePath = " + mCopyFilePath);
+                            copyFile(resPath, mCopyFilePath + "/" + fileName);
+                            paths[i] = mCopyFilePath + "/" + fileName;
+                        }
+                        MediaScannerConnection.scanFile(mActivity, paths, null, null);
+                        */
+                    }
+                }else{
+                    Log.w(TAG,"onStateResult RESULT_COYP_IMAGE cancel new folder mCopyFilePath = " + mCopyFilePath);
+                    mCopyFilePath = null;
+                }
+                break;
+            }
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.20
+            case ActionModeHandler.RESULT_MOVE_IMAGE:
+                mActionModeHandler.onStateResult(requestCode, resultCode, data);
+                break;
+            // transsion end
+            default:
+                break;
+        }
+    }
+
+    private void copyFile(String resPath, String dest) {
+        if (resPath == null || dest == null) {
+            Log.e(TAG, "CopyFile: param is null, fileInfo=" + resPath + ", dest=" + dest);
+            return;
+        }
+        Log.w(TAG,"copyFile resPath = " + resPath + " dest = " + dest);
+        try {
+            int bytesum = 0;
+            int byteread = 0;
+            File oldfile = new File(resPath);
+            if (oldfile.exists()) {
+                InputStream inStream = new FileInputStream(resPath);
+                FileOutputStream fs = new FileOutputStream(dest);
+                byte[] buffer = new byte[1024];
+                int length;
+                while ( (byteread = inStream.read(buffer)) != -1) {
+                    bytesum += byteread;
+                    System.out.println(bytesum);
+                    fs.write(buffer, 0, byteread);
+                }
+                inStream.close();
+            }
+            Log.w(TAG,"copyFile done");
+        }
+        catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -857,17 +1262,89 @@ public class AlbumSetPage extends ActivityState implements
     public void onSelectionModeChange(int mode) {
         switch (mode) {
             case SelectionManager.ENTER_SELECTION_MODE: {
-                mActionBar.disableClusterMenu(true);
+                // transsion begin, IB-02533, xieweiwei, delete, 2016.12.02
+                //if (mActivity.getTabViewManager() != null) {
+                //    mActivity.getTabViewManager().enterSelectionMode();
+                //}
+                //if(mActivity.getMyActionBar() != null){
+                //    mActivity.getMyActionBar().setSelectedMode(true);
+                //}
+                //mActionBar.disableClusterMenu(true);
+                // transsion end
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.06
+                if (mActivity.getTabViewManager() != null) {
+                    mActivity.getTabViewManager().enterSelectionMode();
+                }
+                // transsion end
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.03
+                if(mActivity.getMyActionBar() != null){
+                    mActivity.getMyActionBar().setSelectedMode(true);
+                }
+                // transsion end
                 mActionModeHandler.startActionMode();
                 performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                // transsion begin, IB-02533, xieweiwei, delete, 2016.12.01
+                //updateActionBar();
+                // transsion end
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.02
+                updateActionBar();
+                // transsion end
+                // transsion begin, IB-02533, xieweiwei, modify, 2016.12.08
+                //hideCameraView();
+                hideNewFolderView();
+                // transsion end
+                // transsion begin, IB-02533, xieweiwei, add, 2016.11.21
+                if(mBottomControls != null){
+                    mBottomControls.show();
+                    mBottomControls.refresh();
+                }
+                // transsion end
+
                 break;
             }
             case SelectionManager.LEAVE_SELECTION_MODE: {
+                // transsion begin, IB-02533, xieweiwei, delete, 2016.12.02
+                //if (mActivity.getTabViewManager() != null) {
+                //    mActivity.getTabViewManager().leaveSelectionMode();
+                //}
+                //if(mActivity.getMyActionBar() != null){
+                //    mActivity.getMyActionBar().setSelectedMode(false);
+                //}
+                // transsion end
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.06
+                if (mActivity.getTabViewManager() != null) {
+                    mActivity.getTabViewManager().leaveSelectionMode();
+                }
+                // transsion end
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.03
+                if(mActivity.getMyActionBar() != null){
+                    mActivity.getMyActionBar().setSelectedMode(false);
+                }
+                // transsion end
                 mActionModeHandler.finishActionMode();
                 if (mShowClusterMenu) {
                     mActionBar.enableClusterMenu(mSelectedAction, this);
                 }
+                // transsion begin, IB-02533, xieweiwei, modify, 2016.12.06
+                //updateActionBar();
+                mHandler.sendEmptyMessageDelayed(MSG_UPDATE_OPTION_MENU, 200);
+                // transsion end
+                // transsion begin, IB-02533, xieweiwei, add, 2016.11.21
+                if(mBottomControls != null){
+                    mBottomControls.hide();
+                }
+                // transsion end
+
+                // transsion begin, IB-02533, xieweiwei, delete, 2016.12.02
+                //mRootPane.invalidate();
+                // transsion end
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.07
                 mRootPane.invalidate();
+                // transsion end
+                // transsion begin, IB-02533, xieweiwei, modify, 2016.12.08
+                //showCameraView();
+                showNewFolderView();
+                // transsion end
                 break;
             }
             /// M: [BEHAVIOR.ADD] @{
@@ -875,7 +1352,15 @@ public class AlbumSetPage extends ActivityState implements
             case SelectionManager.DESELECT_ALL_MODE:
             /// @}
             case SelectionManager.SELECT_ALL_MODE: {
+                if(mActivity.getMyActionBar() != null){
+                    mActivity.getMyActionBar().setSelectedMode(true);
+                }
                 mActionModeHandler.updateSupportedOperation();
+                updateActionBar();
+                // transsion begin, IB-02533, xieweiwei, modify, 2016.12.08
+                //hideCameraView();
+                hideNewFolderView();
+                // transsion end
                 mRootPane.invalidate();
                 break;
             }
@@ -908,6 +1393,18 @@ public class AlbumSetPage extends ActivityState implements
         }
         mDetailsHelper.show();
     }
+
+	protected void updateActionBar() {
+        if (!isUpdateMenuEnable()) {
+            return;
+        }
+		// TODO Auto-generated method stub
+		if(mSelectionManager!=null && mSelectionManager.inSelectionMode()){
+			mActivity.getTabViewManager().setVisibility(View.INVISIBLE);
+		}else{
+			mActivity.getTabViewManager().setVisibility(View.VISIBLE);
+		}
+	}
 
     @Override
     public void onSyncDone(final MediaSet mediaSet, final int resultCode) {
@@ -1085,4 +1582,302 @@ public class AlbumSetPage extends ActivityState implements
         }
     }
     /// @}
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.21
+    @Override
+    public void refreshBottomControlsWhenReady() {
+        if (mBottomControls == null) {
+            return;
+        }
+    }
+
+    @Override
+    public void onBottomControlClicked(int control) {
+        switch(control) {
+            case R.id.custom_bottom_control_share:
+                if((mActionModeHandler != null)&&(mSelectionManager.inSelectionMode())){
+                    mActionModeHandler.startActionShare();
+                }
+                return;
+            case R.id.custom_bottom_control_delete:
+                if((mActionModeHandler != null)&&(mSelectionManager.inSelectionMode())){
+                    mActionModeHandler.startActionDelete();
+                }
+                return;
+            case R.id.custom_bottom_control_more:
+                return;
+            default:
+                return;
+        }
+    }
+
+    @Override
+    public boolean canDisplayBottomControls() {
+        return true;
+    }
+
+    @Override
+    public boolean canDisplayBottomControl(int control) {
+        switch(control) {
+            case R.id.custom_bottom_control_more:
+                return true;
+            case R.id.custom_bottom_control_share:
+                return true;
+            case R.id.custom_bottom_control_delete:
+                return true;
+            default:
+                return false;
+        }
+    }
+    // transsion end
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+    // override delayDoResume function in base class
+    protected void delayDoResume() {
+        DELAY_TIME_TO_RESUME = 1000;
+        if (mHasDoCreate) {
+            DELAY_TIME_TO_RESUME = 200;
+        }
+        super.delayDoResume();
+    }
+
+    protected void newfolderpickuppicture(String path) {
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.21
+        if (mData != null && mData.getBoolean(
+                    GalleryActivity.KEY_NEW_FOLDER_ICON, false)) {
+            File dir = new File(path);
+            if (!dir.exists()){
+                Log.d(TAG, "dir not exit,will create this, path = " + mCopyFilePath);
+                dir.mkdirs();
+            }
+            Activity activity = mActivity;
+            Intent result = new Intent()
+                    .putExtra(AlbumPicker.KEY_ALBUM_PATH, path);
+            activity.setResult(Activity.RESULT_OK, result);
+            activity.finish();
+            return;
+        }
+        // transsion end
+
+        mCopyFilePath = path;
+        Intent intent = new Intent();
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.23
+        //intent.setType("image/*");
+        // transsion end
+        intent.setAction(Intent.ACTION_GET_CONTENT);
+        Bundle data = new Bundle();
+        data.putBoolean(GalleryActivity.KEY_GET_MULTIIMAGE, true);
+        intent.putExtras(data);
+        intent.setClassName("com.android.gallery3d", "com.android.gallery3d.app.GalleryActivity");
+        //Intent i = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        mActivity.startActivityForResult(intent, RESULT_COYP_IMAGE);
+    }
+    // transsion end
+    private String getRealPathFromUri(Context context, Uri uri){
+        String filePath = null;
+        fileName = null;
+        String[] wholeID = mActivity.getDataManager().findPathByUri(uri,
+                       "image").split();
+        Log.w(TAG,"wholeID = " + wholeID.length);
+        for(int i = 0; i < wholeID.length; i++){
+            Log.w(TAG,"wholeID[" + i + "] = " + wholeID[i]);
+        }
+
+        String id = wholeID[3];
+        Log.w(TAG,"id = " + id);
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.23
+        String type = wholeID[1];
+        if ("image".equals(type)) {
+        // transsion end
+
+        String[] projection = { MediaStore.Images.Media.DATA, "_display_name" };
+        String selection = MediaStore.Images.Media._ID + "=?";
+        String[] selectionArgs = { id };
+
+        Cursor cursor = context.getContentResolver().query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
+                selection, selectionArgs, null);
+        int columnIndex = cursor.getColumnIndex(projection[0]);
+        int titleIndex = cursor.getColumnIndex(projection[1]);
+
+        if (cursor.moveToFirst()) {
+            filePath = cursor.getString(columnIndex);
+            fileName = cursor.getString(titleIndex);
+            Log.w(TAG,"getRealPathFromUri filePath = " + filePath + " fileName = " + fileName);
+        }
+        cursor.close();
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.23
+        } else if ("video".equals(type)) {
+            String[] projection = { MediaStore.Video.Media.DATA, "_display_name" };
+            String selection = MediaStore.Video.Media._ID + "=?";
+            String[] selectionArgs = { id };
+            Cursor cursor = context.getContentResolver().query(
+                MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection,
+                selection, selectionArgs, null);
+            int columnIndex = cursor.getColumnIndex(projection[0]);
+            int titleIndex = cursor.getColumnIndex(projection[1]);
+            if (cursor.moveToFirst()) {
+                filePath = cursor.getString(columnIndex);
+                fileName = cursor.getString(titleIndex);
+                Log.w(TAG,"getRealPathFromUri video filePath = " + filePath + " mFileNameTo = " + fileName);
+            }
+            cursor.close();
+        }
+        // transsion end
+
+        return filePath;
+    }
+
+    public class copyFilesAsync extends AsyncTask {
+
+        /* (non-Javadoc)
+         * @see android.os.AsyncTask#onPreExecute()
+         */
+        @Override
+        protected void onPreExecute() {
+            // TODO Auto-generated method stub
+            super.onPreExecute();
+            Log.w(TAG,"onPreExecute");
+            showDialog();
+        }
+
+        @Override
+        protected Object doInBackground(Object... params) {
+            // TODO Auto-generated method stub
+            String[] paths = new String[uris.size()];
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.23
+            ArrayList<String> shotPaths = new ArrayList<String>();
+            // transsion end
+            for(int i = 0; i < uris.size(); i++){
+                String resPath = getRealPathFromUri(mActivity, uris.get(i));
+                Log.w(TAG,"resPath = " + resPath + " mCopyFilePath = " + mCopyFilePath);
+                copyFile(resPath, mCopyFilePath + "/" + fileName);
+                paths[i] = mCopyFilePath + "/" + fileName;
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.23
+                if (isConshotPicByDatabase(mActivity, uris.get(i))) {
+                    copyConshotImageByDatabase(mActivity, uris.get(i), shotPaths, mGroupId, resPath, mCopyFilePath);
+                }
+                // transsion end
+            }
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.23
+            if (shotPaths.size() > 0) {
+                String[] comPaths = new String[paths.length + shotPaths.size()];
+                for (int i = 0; i < paths.length; i++) {
+                    comPaths[i] = paths[i];
+                    Log.w(TAG,"comPaths[i] = " + comPaths[i] + " i = " + i);
+                }
+                for (int j = 0; j < shotPaths.size(); j++) {
+                    comPaths[paths.length + j] = shotPaths.get(j);
+                    Log.w(TAG,"comPaths[paths.length + j] = " + comPaths[paths.length + j] + " i = " + (paths.length + j));
+                }
+                MediaScannerConnection.scanFile(mActivity, comPaths, null, null);
+            } else {
+            // transsion end
+            MediaScannerConnection.scanFile(mActivity, paths, null, null);
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.23
+            }
+            // transsion end
+            return null;
+        }
+        /* (non-Javadoc)
+         * @see android.os.AsyncTask#onPostExecute(java.lang.Object)
+         */
+        @Override
+        protected void onPostExecute(Object result) {
+            // TODO Auto-generated method stub
+            Log.w(TAG,"onPostExecute");
+            mProgressDialog.dismiss();
+            mCopyFilePath = null;
+        }
+    }
+
+
+	public void showDialog() {
+    // TODO Auto-generated method stub
+        if(mProgressDialog == null){
+            mProgressDialog = new ProgressDialog(mActivity);
+        }
+        mProgressDialog.setMessage(mActivity.getResources().getString(R.string.please_wait));
+        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.show();
+	}
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.23
+    private boolean copyConshotImageByDatabase(Context context, Uri uri, ArrayList<String> comPaths, int groupId, String fileFullNameFrom, String filePathTo) {
+        if (groupId <= 0 || fileFullNameFrom == null || "".equals(fileFullNameFrom)) {
+            return false;
+        }
+        String filePath = fileFullNameFrom;
+        String path = filePath.substring(0, filePath.lastIndexOf("/"));
+
+        String[] projectionGroup = { MediaStore.Images.Media.DATA, "_display_name"};
+        String selectionGroup = MediaStore.Images.ImageColumns.GROUP_ID + "=?";
+        String groupIdString = "" + groupId;
+        String[] selectionArgsGroup = { groupIdString };
+
+        Cursor cursorGroup = context.getContentResolver().query(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projectionGroup,
+                selectionGroup, selectionArgsGroup, null);
+        int columnIndexGroup = cursorGroup.getColumnIndex(projectionGroup[0]);
+        int titleIndexGroup = cursorGroup.getColumnIndex(projectionGroup[1]);
+
+        String filePathGroup;
+        String fileNameToGroup;
+        if (cursorGroup != null && cursorGroup.moveToFirst()) {
+            int groundIndex = 1;
+            String pathGroup;
+            do {
+                filePathGroup = cursorGroup.getString(columnIndexGroup);
+                fileNameToGroup = cursorGroup.getString(titleIndexGroup);
+                pathGroup = filePathGroup.substring(0, filePathGroup.lastIndexOf("/"));
+                Log.w(TAG, "copyConshotImageByDatabase filePathGroup = " + filePathGroup + " fileNameToGroup = " + fileNameToGroup + "path = " + path + " pathGroup = " + pathGroup + " groupId = " + groupId);
+                if (path != null && path.equals(pathGroup)) {
+                    if (filePath != null && !filePath.equals(filePathGroup)) {
+                        copyFile(filePathGroup, mCopyFilePath + "/" + fileNameToGroup);
+                        comPaths.add(mCopyFilePath + "/" + fileNameToGroup);
+                    }
+                }
+            } while (cursorGroup.moveToNext());
+        }
+        cursorGroup.close();
+        return true;
+    }
+    // transsion end
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.23
+    private int getGroupId(Context context, Uri uri) {
+        int groupId = 0;
+        String[] wholeID = mActivity.getDataManager().findPathByUri(uri,
+                   "image").split();
+        String id = wholeID[3];
+        String type = wholeID[1];
+        if ("image".equals(type)) {
+            String[] projection = { MediaStore.Images.Media.DATA, "_display_name", "group_id"};
+            String selection = MediaStore.Images.Media._ID + "=?";
+            String[] selectionArgs = { id };
+            Cursor cursor = context.getContentResolver().query(
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection,
+                    selection, selectionArgs, null);
+            int groupIdIndex = cursor.getColumnIndex(projection[2]);
+            if (cursor != null && cursor.moveToFirst()) {
+                groupId = cursor.getInt(groupIdIndex);
+                mGroupId = groupId;
+            }
+            cursor.close();
+        }
+        return groupId;
+    }
+
+    private boolean isConshotPicByDatabase(Context context, Uri uri) {
+        int groupId = getGroupId(context, uri);
+        if (groupId != 0) {
+            return true;
+        }
+        return false;
+    }
+    // transsion end
+
 }

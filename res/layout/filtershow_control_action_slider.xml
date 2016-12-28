@@ -28,7 +28,7 @@
         android:layout_gravity="start|center_vertical"
         android:scaleType="centerInside"
         android:layout_weight="0"
-        android:background="@drawable/filtershow_button_background"
+        android:background="@color/filtershow_main_background_color"
         android:src="@drawable/filtershow_addpoint"
         android:paddingBottom="8dp"  />
 
@@ -47,8 +47,8 @@
         android:layout_gravity="end|center_vertical"
         android:scaleType="centerInside"
         android:layout_weight="0"
-        android:background="@drawable/filtershow_button_background"
-        android:src="@drawable/ic_menu_trash_holo_light"
+        android:background="@color/filtershow_main_background_color"
+        android:src="@drawable/filtershow_delpoint"
         android:paddingBottom="8dp"  />
 
 </LinearLayout>

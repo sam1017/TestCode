@@ -64,6 +64,10 @@ public class CategoryView extends IconView
     private long mDoubleActionLast = 0;
     private long mDoubleTapDelay = 250;
 
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.27
+    private int mMargin = 16;
+    // transsion end
+
     public CategoryView(Context context) {
         super(context);
         setOnClickListener(this);
@@ -78,6 +82,11 @@ public class CategoryView extends IconView
         mBorderPaint = new Paint(mSelectPaint);
         mBorderPaint.setColor(Color.BLACK);
         mBorderStroke = mSelectionStroke / 3;
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.27
+        mMargin = res.getDimensionPixelOffset(R.dimen.category_panel_margin);
+        // transsion end
+
     }
 
     @Override
@@ -131,11 +140,29 @@ public class CategoryView extends IconView
                 setBitmap(mAction.getImage());
             }
         }
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.26
+        setIsSelected(mAdapter.isSelected(this));
+        // transsion end
+
         super.onDraw(canvas);
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.26
+        String text = getText();
+        if (text != null && !("".equals(text))) {
+            return;
+        }
+        // transsion end
+
         if (mAdapter.isSelected(this)) {
-            SelectionRenderer.drawSelection(canvas, 0, 0,
-                    getWidth(), getHeight(),
+            // transsion begin, IB-02533, xieweiwei, modify, 2016.12.27
+            //SelectionRenderer.drawSelection(canvas, 0, 0,
+            //        getWidth(), getHeight(),
+            //        mSelectionStroke, mSelectPaint, mBorderStroke, mBorderPaint);
+            SelectionRenderer.drawSelection(canvas, mSelectionStroke, mSelectionStroke + mMargin / 2,
+                    getWidth() - mSelectionStroke, getHeight() - mSelectionStroke,
                     mSelectionStroke, mSelectPaint, mBorderStroke, mBorderPaint);
+            // transsion end
         }
     }
 

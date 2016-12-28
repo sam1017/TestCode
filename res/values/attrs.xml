@@ -43,4 +43,36 @@
         <attr name="images" format="reference" />
     </declare-styleable> -->
 
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.8 -->
+    <declare-styleable name="RippleView">
+        <attr name="rv_alpha" format="integer" />
+        <attr name="rv_framerate" format="integer" />
+        <attr name="rv_rippleDuration" format="integer" />
+        <attr name="rv_zoomDuration" format="integer" />
+        <attr name="rv_color" format="color" />
+        <attr name="rv_centered" format="boolean" />
+        <attr name="rv_type" format="enum">
+            <enum name="simpleRipple" value="0" />
+            <enum name="doubleRipple" value="1" />
+            <enum name="rectangle" value="2" />
+        </attr>
+        <attr name="rv_ripplePadding" format="dimension" />
+        <attr name="rv_zoom" format="boolean" />
+        <attr name="rv_zoomScale" format="float" />
+    </declare-styleable>
+    <!-- transsion end -->
+
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.12 -->
+    <declare-styleable name="FlexImageView">
+        <attr name="text" format="reference"/>
+        <attr name="src" format="reference"/>
+        <attr name="textSize"  format="dimension"/>
+        <attr name="textColor" format="color"/>
+        <attr name="showType" format="enum">
+            <enum name="showIcon" value="0"/>
+            <enum name="showText" value="1"/>
+        </attr>
+    </declare-styleable>
+    <!-- transsion end -->
+
 </resources>

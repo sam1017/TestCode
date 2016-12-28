@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+         Copyright (c) 2016-2036  TRANSSION HOLDINGS                               
+                                                                                   
+    PROPRIETARY RIGHTS of TRANSSION HOLDINGS are involved in the                   
+    subject matter of this material.  All manufacturing, reproduction, use,        
+    and sales rights pertaining to this subject matter are governed by the         
+    license agreement.  The recipient of this software implicitly accepts          
+    the terms of the license.                                                      
+                                                                                   
+    Description: actionbar tab line                                                
+    Author:      IB-02533                                                          
+    Version:     V1.0                                                              
+    Date:        2016.11.18                                                        
+    Modification:                                                                  
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++-->
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:state_selected="true"    
+        android:state_focused="true"
+        android:drawable="@drawable/action_tab_line" />
+    <item
+        android:state_selected="true"    
+        android:state_pressed="true"
+        android:drawable="@drawable/action_tab_line" />
+    <item
+        android:state_selected="true"
+        android:drawable="@drawable/action_tab_line" />
+    <item
+        android:state_selected="false"
+        android:state_focused="true"
+        android:drawable="@drawable/action_tab_line" />
+    <item
+        android:state_selected="false"
+        android:state_pressed="true"
+        android:drawable="@drawable/action_tab_line" />
+    <item
+        android:state_selected="false"
+        android:drawable="@drawable/action_tab_line" />
+</selector>

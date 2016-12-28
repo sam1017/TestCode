@@ -1,5 +1,6 @@
 package com.android.gallery3d.app;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -13,6 +14,7 @@ import android.provider.MediaStore;
 import android.view.HapticFeedbackConstants;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.android.gallery3d.util.Future;
@@ -48,6 +50,10 @@ import com.mediatek.galleryfeature.platform.PlatformHelper;
 import com.mediatek.galleryfeature.config.FeatureConfig;
 import com.mediatek.galleryframework.util.GalleryPluginUtils;
 import com.android.gallery3d.util.GalleryUtils;
+
+// transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+import com.transsion.gallery3d.ui.FloatingActionBar;
+// transsion end
 
 public class NewTimerShaftPage extends ActivityState implements SelectionManager.SelectionListener,
 MediaSet.SyncListener, GalleryActionBar.OnAlbumModeSelectedListener,
@@ -89,8 +95,13 @@ AbstractGalleryActivity.EjectListener {
 
     private static final int BIT_LOADING_RELOAD = 1;
     private static final int BIT_LOADING_SYNC = 2;
-    private static final int MSG_PICK_PHOTO = 0;
+    private static final int MSG_PICK_PHOTO = 1;
+    private static final int MSG_UPDATE_OPTION_MENU = 2;
+
+    private static final int REQUEST_SLIDESHOW = 1;
     public static final int REQUEST_PHOTO = 2;
+    private int slotViewTop = 0;
+
     private static final float USER_DISTANCE_METER = 0.3f;
 
     private int mSyncResult;
@@ -100,6 +111,7 @@ AbstractGalleryActivity.EjectListener {
     private boolean mLaunchedFromPhotoPage;
 	private boolean mInCameraApp;
     private Handler mHandler;
+    private GalleryActionBar mActionBar;
     private PhotoFallbackEffect mResumeEffect;
     private PhotoFallbackEffect.PositionProvider mPositionProvider =
             new PhotoFallbackEffect.PositionProvider() {
@@ -128,12 +140,44 @@ AbstractGalleryActivity.EjectListener {
     private boolean mInitialSynced = false;
     private Future<Integer> mSyncTask = null;
 	protected int mUserDistance;
+    private Toast mWaitToast = null;
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+    private Bundle mBundle = null;
+    // transsion end
 
 	@Override
 	protected void onCreate(Bundle data, Bundle storedState) {
 		// TODO Auto-generated method stub
 		super.onCreate(data, storedState);
-        
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+        // do create function later in onResume process
+        mBundle = data;
+        // transsion begin, IB-02533, xiewiwei, delete, 2016.12.01
+        //// transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+        //doCreate();
+        //mHasDoCreate = true;
+        //// transsion end
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        if (mActivity.getActionBar() == null) {
+            doCreate();
+            mHasDoCreate = true;
+        }
+        // transsion end
+        if(mCameraImageView != null){
+            mCameraImageView = null;
+        }
+
+    }
+
+    // implements doCreate function in base class
+    protected void doCreate() {
+        Bundle data = mBundle;
+    // transsion end
+
 		if(DEBUG) Log.w(TAG,"onCreate");
         mUserDistance = GalleryUtils.meterToPixel(USER_DISTANCE_METER);
         initializeViews();
@@ -145,6 +189,8 @@ AbstractGalleryActivity.EjectListener {
         mShowClusterMenu = data.getBoolean(KEY_SHOW_CLUSTER_MENU, false);
         mDetailsSource = new MyDetailsSource();
         Context context = mActivity.getAndroidContext();
+        mActionBar = mActivity.getGalleryActionBar();
+        slotViewTop = 96; //mActionBar.getHeight();
 
         if (data.getBoolean(KEY_AUTO_SELECT_ALL)) {
             mSelectionManager.selectAll();
@@ -155,6 +201,8 @@ AbstractGalleryActivity.EjectListener {
         /// M: [FEATURE.MODIFY] [Camera independent from Gallery] @{
         /*mInCameraApp = data.getBoolean(PhotoPage.KEY_APP_BRIDGE, false);*/
         mInCameraApp = data.getBoolean(PhotoPage.KEY_LAUNCH_FROM_CAMERA, false);
+        mInCameraAndWantQuitOnPause = mInCameraApp;
+
         /// @}
 
         mHandler = new SynchronizedHandler(mActivity.getGLRoot()) {
@@ -165,6 +213,9 @@ AbstractGalleryActivity.EjectListener {
                         pickPhoto(message.arg1);
                         break;
                     }
+                    case MSG_UPDATE_OPTION_MENU:
+                        updateActionBar();
+                        break;
                     default:
                         throw new AssertionError(message.what);
                 }
@@ -176,6 +227,18 @@ AbstractGalleryActivity.EjectListener {
                 .onCreate(mActivity, data, mActionModeHandler, mSelectionManager);
         
         }
+
+	protected void updateActionBar() {
+        if (!isUpdateMenuEnable()) {
+            return;
+        }
+		// TODO Auto-generated method stub
+		if(mSelectionManager!=null && mSelectionManager.inSelectionMode()){
+			mActivity.getTabViewManager().setVisibility(View.INVISIBLE);
+		}else{
+			mActivity.getTabViewManager().setVisibility(View.VISIBLE);
+		}
+	}
 
 	protected void pickPhoto(int slotIndex) {
 		// TODO Auto-generated method stub
@@ -340,7 +403,7 @@ AbstractGalleryActivity.EjectListener {
 
 	private void initializeViews() {
 		// TODO Auto-generated method stub
-        mSelectionManager = new SelectionManager(mActivity, true);
+        mSelectionManager = new SelectionManager(mActivity, false);
         mSelectionManager.setSelectionListener(this);
 		
 		if(DEBUG) Log.w(TAG,"initializeViews");
@@ -377,7 +440,10 @@ AbstractGalleryActivity.EjectListener {
             
         });
 
-        mActionModeHandler = new ActionModeHandler(mActivity, mSelectionManager);
+        // transsion begin, IB-02533, xieweiwei, modify, 2016.11.21
+        //mActionModeHandler = new ActionModeHandler(mActivity, mSelectionManager);
+        mActionModeHandler = new ActionModeHandler(mActivity, mSelectionManager, this);
+        // transsion end
         mActionModeHandler.setActionModeListener(new ActionModeListener() {
             @Override
             public boolean onActionItemClicked(MenuItem item) {
@@ -386,7 +452,7 @@ AbstractGalleryActivity.EjectListener {
             /// M: [BEHAVIOR.ADD] @{
             public boolean onPopUpItemClicked(int itemId) {
                 // return if restoreSelection has done
-                return false; //mRestoreSelectionDone;
+                return mRestoreSelectionDone;
             }
         });
 	}
@@ -405,6 +471,7 @@ AbstractGalleryActivity.EjectListener {
         mSelectionManager.setAutoLeaveSelectionMode(true);
         mSelectionManager.toggle(item.getPath());
         mSlotView.invalidate();
+        mDetailsSource.findIndex(slotIndex);
 	}
 
 	protected void onSingleTapUp(int slotIndex) {
@@ -416,9 +483,28 @@ AbstractGalleryActivity.EjectListener {
             MediaItem item = mAlbumDataAdapter.get(slotIndex);
             if (item == null)
                 return; // Item not ready yet, ignore the click
-            mSelectionManager.toggle(item.getPath());
-            mDetailsSource.findIndex(slotIndex);
-            mSlotView.invalidate();
+            /// M: [BUG.MODIFY] @{
+            // If restore selection not done in selection mode,
+            // after click one slot, show 'wait' toast
+            // mSelectionManager.toggle(item.getPath());
+            // mSlotView.invalidate();
+            if (mRestoreSelectionDone) {
+                /// M: [BUG.ADD] fix menu display abnormal @{
+                if (mActionModeHandler != null) {
+                    mActionModeHandler.closeMenu();
+                }
+                /// @}
+                mSelectionManager.toggle(item.getPath());
+                mSlotView.invalidate();
+            } else {
+                if (mWaitToast == null) {
+                    mWaitToast = Toast.makeText(mActivity,
+                            com.android.internal.R.string.wait,
+                            Toast.LENGTH_SHORT);
+                }
+                mWaitToast.show();
+            }
+            /// @}
         } else {
             // Show pressed-up animation for the single-tap.
 
@@ -450,6 +536,17 @@ AbstractGalleryActivity.EjectListener {
 	protected void onPause() {
 		// TODO Auto-generated method stub
 		super.onPause();
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+        if (!mHasDoResume) {
+            return;
+        }
+        // transsion end
+
+         // transsion begin, IB-02533, xieweiwei, add, 2016.12.07
+         mHandler.removeMessages(0);
+         // transsion end
+
         mIsActive = false;
 
         mAlbumView.setSlotFilter(null);
@@ -482,6 +579,8 @@ AbstractGalleryActivity.EjectListener {
         }
         /// @}
 
+        //hideCameraView();
+
         /// M: [FEATURE.ADD] Gallery picker plugin @{
         GalleryPluginUtils.getGalleryPickerPlugin().onPause();
 }
@@ -492,23 +591,104 @@ AbstractGalleryActivity.EjectListener {
 		super.onResume();
 		Log.w(TAG,"onResume");
 		mIsActive = true;
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+        // transsion begin, IB-02533, xiewiwei, delete, 2016.12.01
+        //// send message to base class to do create and resume function
+        //// transsion begin, IB-02533, xieweiwei, modify, 2016.11.30
+        ////delayDoResume();
+        //doResume();
+        //mHasDoResume = true;
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        if (mActivity.getActionBar() != null) {
+        // transsion end
+
+        // transsion begin, IB-02533, xiewiwei, add, 2016.12.01
+        delayDoResume();
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        } else {
+            doResume();
+            mHasDoResume = true;
+        }
+        // transsion end
+
+    }
+
+    // implements doResume function in base class
+    protected void doResume() {
+    // transsion end
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.13
+        showStateBar();
+        // transsion end
+
         mResumeEffect = mActivity.getTransitionStore().get(KEY_RESUME_ANIMATION);
         if (mResumeEffect != null) {
             mAlbumView.setSlotFilter(mResumeEffect);
             mResumeEffect.setPositionProvider(mPositionProvider);
             mResumeEffect.start();
         }
-        
-        setContentPane(mRootPane);
+        // transsion begin, IB-02533, modify, xieweiwei
+        //setContentPane(mRootPane);
+        setTabContentPane(mRootPane);
+        // transsion end
         setLoadingBit(BIT_LOADING_RELOAD);
         mLoadingFailed = false;
         if (mSelectionManager != null && mSelectionManager.inSelectionMode()) {
             mNeedUpdateSelection = true;
             // set mRestoreSelectionDone as false if we need to retore selection
             mRestoreSelectionDone = false;
+            hideCameraView();
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            // transsion begin, IB-02533, xieweiwei, modify, 2016.12.16
+            //if (mActivity.getTabViewManager() == null) {
+            if (mActivity.getTabViewManager() != null) {
+            // transsion end
+            // transsion begin
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+            if (mActivity.getTabViewManager().getCurrentTabIndex() == 0) {
+                // transsion begin, IB-02533, xieweiwei, modify, 2016.12.15
+                //FloatingActionBar.getInstance(mActivity).showSelectionModeActionBar();
+                getFloatingActionBar().showSelectionModeActionBar();
+                // transsion end
+            }
+            // transsion end
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            }
+            // transsion begin
+
         } else {
             // set mRestoreSelectionDone as true there is no need to retore selection
             mRestoreSelectionDone = true;
+            if(isUpdateMenuEnable()){
+                showCameraView();
+            }
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            // transsion begin, IB-02533, xieweiwei, modify, 2016.12.16
+            //if (mActivity.getTabViewManager() == null) {
+            if (mActivity.getTabViewManager() != null) {
+            // transsion end
+            // transsion begin
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+            if (mActivity.getTabViewManager().getCurrentTabIndex() == 0) {
+                // transsion begin, IB-02533, xieweiwei, modify, 2016.12.15
+                //FloatingActionBar.getInstance(mActivity).showTabActionBar();
+                getFloatingActionBar().showTabActionBar();
+                // transsion end
+            }
+            // transsion end
+
+            // transsion begin, IB-02533, xieweiwei, add, 2016.12.16
+            }
+            // transsion begin
         }
 
         mAlbumDataAdapter.resume();
@@ -528,6 +708,7 @@ AbstractGalleryActivity.EjectListener {
         /// M: [FEATURE.ADD] Gallery picker plugin @{
         GalleryPluginUtils.getGalleryPickerPlugin().onResume(mSelectionManager);
         /// @}
+        updateActionBar();
 
 	}
 
@@ -535,6 +716,11 @@ AbstractGalleryActivity.EjectListener {
 	protected boolean onCreateActionBar(Menu menu) {
 		// TODO Auto-generated method stub
 		Log.w(TAG,"onCreateActionBar");
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.06
+        mActivity.getTabViewManager().hideDisplayTitle();
+        // transsion end
+
 		return true;
 		//return super.onCreateActionBar(menu);
 	}
@@ -543,27 +729,46 @@ AbstractGalleryActivity.EjectListener {
 	protected void onDestroy() {
 		// TODO Auto-generated method stub
 		super.onDestroy();
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+        if (!mHasDoResume) {
+            return;
+        }
+        // transsion end
+
+        mAlbumView.destroy();
+        mSlotView.destroy();
+        if (mAlbumDataAdapter != null) {
+            mAlbumDataAdapter.setLoadingListener(null);
+        }
 	}
 
     private final GLView mRootPane = new GLView() {
         private final float mMatrix[] = new float[16];
 
-        @Override
-        protected void renderBackground(GLCanvas view) {
-            view.clearBuffer();
-        }
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.02
+        //@Override
+        //protected void renderBackground(GLCanvas view) {
+        //    view.clearBuffer();
+        //}
+        // transsion end
 
         @Override
         protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
 
-            int slotViewTop = 0;
             //slotViewTop = mActivity.getMyActionBar().getActionBarSize4DivideScreen(right - left, bottom - top);
 
-            slotViewTop = mActivity.getGalleryActionBar().getHeight();
+            if(slotViewTop == 0) {
+                slotViewTop = mActionBar.getHeight();
+            }
             int slotViewBottom = bottom - top;
             int slotViewRight = right - left;
 
-            mAlbumView.setHighlightItemPath(null);
+            if (mShowDetails) {
+                mDetailsHelper.layout(left, slotViewTop, right, bottom);
+            } else {
+                mAlbumView.setHighlightItemPath(null);
+            }
 
             // Set the mSlotView as a reference point to the open animation
             mOpenCenter.setReferencePosition(0, slotViewTop);
@@ -599,6 +804,22 @@ AbstractGalleryActivity.EjectListener {
     
     private boolean mShowDetails;
 	private DetailsHelper mDetailsHelper;
+	private boolean mInCameraAndWantQuitOnPause;
+
+    private void showDetails() {
+		// TODO Auto-generated method stub
+        mShowDetails = true;
+        if (mDetailsHelper == null) {
+            mDetailsHelper = new DetailsHelper(mActivity, mRootPane, mDetailsSource);
+            mDetailsHelper.setCloseListener(new CloseListener() {
+                @Override
+                public void onClose() {
+                    hideDetails();
+                }
+            });
+        }
+        mDetailsHelper.show();
+	}
 
     private void hideDetails() {
         mShowDetails = false;
@@ -609,6 +830,13 @@ AbstractGalleryActivity.EjectListener {
 
     @Override
     protected void onBackPressed() {
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+        if (!mHasDoResume) {
+            return;
+        }
+        // transsion end
+
         if (mShowDetails) {
             hideDetails();
         } else if (mSelectionManager.inSelectionMode()) {
@@ -622,7 +850,59 @@ AbstractGalleryActivity.EjectListener {
         }
     }
     
-    private void onUpPressed() {
+    @Override
+    protected boolean onItemSelected(MenuItem item) {
+        /// M: [FEATURE.ADD] Gallery picker plugin @{
+        if (GalleryPluginUtils.getGalleryPickerPlugin().onItemSelected(item)) {
+            // plugin handled
+            return true;
+        }
+        /// @}
+
+        switch (item.getItemId()) {
+            case android.R.id.home: {
+                onUpPressed();
+                return true;
+            }
+            case R.id.action_cancel:
+                mActivity.getStateManager().finishState(this);
+                return true;
+            case R.id.action_select:
+                mSelectionManager.setAutoLeaveSelectionMode(false);
+                mSelectionManager.enterSelectionMode();
+                return true;
+            case R.id.action_group_by: {
+                //mActivity.getGalleryActionBar().showClusterDialog(this);
+                return true;
+            }
+            case R.id.action_slideshow: {
+                mInCameraAndWantQuitOnPause = false;
+                Bundle data = new Bundle();
+                data.putString(SlideshowPage.KEY_SET_PATH,
+                        mMediaSetPath.toString());
+                data.putBoolean(SlideshowPage.KEY_REPEAT, true);
+                mActivity.getStateManager().startStateForResult(
+                        SlideshowPage.class, REQUEST_SLIDESHOW, data);
+                return true;
+            }
+            case R.id.action_details: {
+                if (mShowDetails) {
+                    hideDetails();
+                } else {
+                    showDetails();
+                }
+                return true;
+            }
+            case R.id.action_camera: {
+                GalleryUtils.startCameraActivity(mActivity);
+                return true;
+            }
+            default:
+                return false;
+        }
+    }
+    
+	private void onUpPressed() {
         if (mInCameraApp) {
             GalleryUtils.startGalleryActivity(mActivity);
         } else if (mActivity.getStateManager().getStateCount() > 1) {
@@ -676,15 +956,78 @@ AbstractGalleryActivity.EjectListener {
 
 	@Override
     public void onSelectionModeChange(int mode) {
+        Log.w(TAG,"onSelectionModeChange mode = " + mode);
         switch (mode) {
             case SelectionManager.ENTER_SELECTION_MODE: {
+                // transsion begin, IB-02533, xieweiwei, delete, 2016.12.02
+                //if (mActivity.getTabViewManager() != null) {
+                //    mActivity.getTabViewManager().enterSelectionMode();
+                //}
+                //if(mActivity.getMyActionBar() != null){
+                //    mActivity.getMyActionBar().setSelectedMode(true);
+                //}
+                //hideCameraView();
+                // transsion end
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.06
+                if (mActivity.getTabViewManager() != null) {
+                    mActivity.getTabViewManager().enterSelectionMode();
+                }
+                // transsion end
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.03
+                if(mActivity.getMyActionBar() != null){
+                    mActivity.getMyActionBar().setSelectedMode(true);
+                }
+                // transsion end
+                // transsion begin, IB-02533, xieweiwei, delete, 2016.12.02
+                //// transsion begin, IB-02533, xieweiwei, add, 2016.12.01
+                ////mActionBar.disableClusterMenu(true);
+                //// transsion end
+                // transsion end
                 mActionModeHandler.startActionMode();
                 performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                // transsion begin, IB-02533, xieweiwei, delete, 2016.12.01
+                //mHandler.sendEmptyMessageDelayed(MSG_UPDATE_OPTION_MENU, 0);
+                // transsion end
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.02
+                updateActionBar();
+                hideCameraView();
+                // transsion end
                 break;
             }
             case SelectionManager.LEAVE_SELECTION_MODE: {
+                // transsion begin, IB-02533, xieweiwei, delete, 2016.12.02
+                //if (mActivity.getTabViewManager() != null) {
+                //    mActivity.getTabViewManager().leaveSelectionMode();
+                //}
+                //if(mActivity.getMyActionBar() != null){
+                //    mActivity.getMyActionBar().setSelectedMode(false);
+                //}
+                //showCameraView();
+                // transsion end
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.06
+                if (mActivity.getTabViewManager() != null) {
+                    mActivity.getTabViewManager().leaveSelectionMode();
+                }
+                // transsion end
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.03
+                if(mActivity.getMyActionBar() != null){
+                    mActivity.getMyActionBar().setSelectedMode(false);
+                }
+                // transsion end
                 mActionModeHandler.finishActionMode();
+                // transsion begin, IB-02533, xieweiwei, delete, 2016.12.02
+                //mRootPane.invalidate();
+                // transsion end
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.07
                 mRootPane.invalidate();
+                // transsion end
+                // transsion begin, IB-02533, xieweiwei, modify, 2016.12.06
+                //updateActionBar();
+                mHandler.sendEmptyMessageDelayed(MSG_UPDATE_OPTION_MENU, 200);
+                // transsion end
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.02
+                showCameraView();
+                // transsion end
                 break;
             }
             /// M: [BEHAVIOR.ADD] @{
@@ -692,8 +1035,13 @@ AbstractGalleryActivity.EjectListener {
             case SelectionManager.DESELECT_ALL_MODE:
             /// @}
             case SelectionManager.SELECT_ALL_MODE: {
+                if(mActivity.getMyActionBar() != null){
+                    mActivity.getMyActionBar().setSelectedMode(true);
+                }
                 mActionModeHandler.updateSupportedOperation();
                 mRootPane.invalidate();
+                updateActionBar();
+                hideCameraView();
                 break;
             }
         }
@@ -712,7 +1060,13 @@ AbstractGalleryActivity.EjectListener {
 	@Override
 	public void onSelectionRestoreDone() {
 		// TODO Auto-generated method stub
-		
+        if (!mIsActive) {
+            return;
+        }
+        mRestoreSelectionDone = true;
+        // Update selection menu after restore done @{
+        mActionModeHandler.updateSupportedOperation();
+        mActionModeHandler.updateSelectionMenu();
 	}
 
     private int mLoadingBits = 0;
@@ -732,6 +1086,7 @@ AbstractGalleryActivity.EjectListener {
             }
         }
     }
+
 
     private class MyLoadingListener implements LoadingListener {
 
@@ -758,8 +1113,16 @@ AbstractGalleryActivity.EjectListener {
             mSelectionManager.onSourceContentChanged();
             boolean restore = false;
             if (itemCount > 0 && inSelectionMode) {
+                if (mNeedUpdateSelection) {
+                    mNeedUpdateSelection = false;
+                    restore = true;
+                    mSelectionManager.restoreSelection();
+                }
                 mActionModeHandler.updateSupportedOperation();
                 mActionModeHandler.updateSelectionMenu();
+            }
+            if (!restore) {
+                mRestoreSelectionDone = true;
             }
             mRootPane.invalidate();
         }
@@ -812,4 +1175,48 @@ AbstractGalleryActivity.EjectListener {
             }
         }
     }
+
+    /// M: [PERF.ADD] add for delete many files performance improve @{
+    @Override
+    public void setProviderSensive(boolean isProviderSensive) {
+        if(mAlbumDataAdapter != null){
+            mAlbumDataAdapter.setSourceSensive(isProviderSensive);
+        }
+    }
+    @Override
+    public void fakeProviderChange() {
+        mAlbumDataAdapter.fakeSourceChange();
+    }
+    /// @}
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+    // override delayDoResume function in base class
+    protected void delayDoResume() {
+        DELAY_TIME_TO_RESUME = 500;
+        if (mHasDoCreate) {
+            DELAY_TIME_TO_RESUME = 200;
+        }
+        super.delayDoResume();
+    }
+    // transsion end
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.15
+    public FloatingActionBar getFloatingActionBar() {
+        return mActivity.getFloatingActionBar();
+    }
+    // transsion end
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.20
+    @Override
+    protected void onStateResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case ActionModeHandler.RESULT_MOVE_IMAGE:
+                mActionModeHandler.onStateResult(requestCode, resultCode, data);
+                break;
+            default:
+                break;
+        }
+    }
+    // transsion end
+
 }

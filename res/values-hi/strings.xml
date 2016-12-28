@@ -441,4 +441,23 @@
         <item quantity="one">%1$d आइटम चयनित</item>
         <item quantity="other">%1$d आइटम चयनित</item>
     </plurals>
+	
+	<string name="current_week_sunday">"रविवार"</string>
+    <string name="current_week_monday">"सोमवार"</string>
+    <string name="current_week_tuesday">"मंगलवार"</string>
+    <string name="current_week_wednesday">"बुधवार"</string>
+    <string name="current_week_thursday">"गुरूवार"</string>
+    <string name="current_week_friday">"शुक्रवार"</string>
+    <string name="current_week_saturday">"शनिवार"</string>
+    <string name="last_week_sunday">"पिछले रविवार"</string>
+    <string name="last_week_monday">"पिछले सोमवार"</string>
+    <string name="last_week_tuesday">"पिछले मंगलवार"</string>
+    <string name="last_week_wednesday">"पिछले बुधवार"</string>
+    <string name="last_week_thursday">"पिछले गुरुवार"</string>
+    <string name="last_week_friday">"पिछले शुक्रवार"</string>
+    <string name="last_week_saturday">"पिछले शनिवार"</string>
+	<string name="today">आज</string>
+    <string name="yesterday">बीता कल</string>
+
+    <string name="action_funny">सेलेब्रिटी</string>
 </resources>

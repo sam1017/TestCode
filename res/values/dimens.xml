@@ -112,27 +112,27 @@
     <!-- configuration for legacy album set page -->
     <integer name="albumset_rows_land">4</integer>
     <integer name="albumset_rows_port">2</integer>
-    <dimen name="albumset_padding_top">1dp</dimen>
+    <dimen name="albumset_padding_top">17dp</dimen>
     <dimen name="albumset_padding_bottom">1dp</dimen>
-    <dimen name="albumset_slot_gap">1dp</dimen>
+    <dimen name="albumset_slot_gap">9dp</dimen>
     <dimen name="albumset_top_padding">1dp</dimen>
-    <dimen name="albumset_horizontal_padding">1dp</dimen>
+    <dimen name="albumset_horizontal_padding">14dp</dimen>
 
     <dimen name="albumset_label_background_height">30dp</dimen>
     <dimen name="albumset_title_offset">10dp</dimen>
     <dimen name="albumset_count_offset">10dp</dimen>
-    <dimen name="albumset_title_font_size">12sp</dimen>
-    <dimen name="albumset_count_font_size">9sp</dimen>
-    <dimen name="albumset_left_margin">2dp</dimen>
-    <dimen name="albumset_title_right_margin">20dp</dimen>
+    <dimen name="albumset_title_font_size">15sp</dimen>
+    <dimen name="albumset_count_font_size">12sp</dimen>
+    <dimen name="albumset_left_margin">11dp</dimen>
+    <dimen name="albumset_title_right_margin">2dp</dimen>
     <dimen name="albumset_icon_size">25dp</dimen>
 
     <!-- configuration for album page -->
-    <integer name="album_rows_land">4</integer>
-    <integer name="album_rows_port">3</integer>
-    <dimen name="album_slot_gap">1dp</dimen>
+    <integer name="album_rows_land">5</integer>
+    <integer name="album_rows_port">4</integer>
+    <dimen name="album_slot_gap">2dp</dimen>
     <dimen name="album_top_padding">1dp</dimen>
-    <dimen name="album_horizontal_padding">1dp</dimen>
+    <dimen name="album_horizontal_padding">0dp</dimen>
 
     <!-- configuration for manage page -->
     <dimen name="cache_pin_size">24dp</dimen>
@@ -143,7 +143,10 @@
 
     <!--  configuration for filtershow UI -->
     <dimen name="thumbnail_size">96dip</dimen>
-    <dimen name="thumbnail_margin">3dip</dimen>
+    <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.12.26 -->
+    <!-- <dimen name="thumbnail_margin">3dip</dimen> -->
+    <dimen name="thumbnail_margin">1dip</dimen>
+    <!-- transsion end -->
     <dimen name="action_item_height">175dip</dimen>
     <dimen name="touch_circle_size">8dp</dimen>
 
@@ -156,4 +159,74 @@
     <dimen name="photoeditor_text_padding">10dp</dimen>
     <dimen name="photoeditor_original_text_size">18dp</dimen>
     <dimen name="photoeditor_original_text_margin">4dp</dimen>
+
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.11.16 -->
+    <dimen name="action_bar_text_size">18sp</dimen>
+    <dimen name="bottom_buttons_height">57dp</dimen>
+    <!-- transsion end -->
+
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.11.19 -->
+    <dimen name="button_corner_radius">10dp</dimen>
+    <dimen name="actionbar_height">63dp</dimen>
+    <!-- transsion end -->
+
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.11.28 -->
+    <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.12.08 -->
+    <!-- <dimen name="camera_indicator_layout_width">110dp</dimen> -->
+    <dimen name="camera_indicator_layout_width">72dp</dimen>
+    <!-- transsion end -->
+    <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.12.08 -->
+    <!-- <dimen name="camera_indicator_layout_height">110dp</dimen> -->
+    <dimen name="camera_indicator_layout_height">72dp</dimen>
+    <!-- transsion end -->
+    <!-- transsion end -->
+    <dimen name="max_count_view">26dp</dimen>
+    <dimen name="albumpage_mrootview_top">64dp</dimen>
+
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.08 -->
+    <dimen name="floating_actionbar_height">48dp</dimen>
+    <dimen name="floating_actionbar_tab_textsize">18sp</dimen>
+    <dimen name="floating_actionbar_standant_textsize">18sp</dimen>
+    <dimen name="floating_actionbar_cluster_textsize">18sp</dimen>
+    <dimen name="floating_actionbar_selection_mode_textsize">18sp</dimen>
+    <!-- paddingleft = (114 + 0) px, means 57dp, screen density: 2 -->
+    <dimen name="floating_actionbar_standant_text_paddingleft">57dp</dimen>
+    <dimen name="floating_actionbar_cluster_text_paddingleft">57dp</dimen>
+    <dimen name="floating_actionbar_selection_mode_text_paddingleft">57dp</dimen>
+    <dimen name="floating_actionbar_cluster_sub_text_paddingright">10dp</dimen>
+    <dimen name="floating_actionbar_tab_right_paddingleft">15dp</dimen>
+    <dimen name="floating_actionbar_tab_left_paddingright">15dp</dimen>
+    <dimen name="floating_actionbar_cluster_sub_textsize">18sp</dimen>
+    <dimen name="floating_actionbar_cluster_spinner_paddingright">0dp</dimen>
+    <dimen name="floating_actionbar_selectionall_paddingright">0dp</dimen>
+    <dimen name="floating_actionbar_tab_margintop">24dp</dimen>
+    <dimen name="floating_actionbar_back_icon_width">72dp</dimen>
+    <dimen name="floating_actionbar_back_icon_height">48dp</dimen>
+    <dimen name="floating_actionbar_selection_icon_width">40dp</dimen>
+    <dimen name="floating_actionbar_selection_icon_height">40dp</dimen>
+    <dimen name="grid_view_select_icon_width">20dp</dimen>
+    <dimen name="grid_view_select_icon_height">20dp</dimen>
+    <dimen name="grid_view_select_icon_paddingright">26dp</dimen>
+    <dimen name="grid_view_select_icon_paddingbottom">25dp</dimen>
+    <!-- transsion end -->
+
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.19 -->
+    <dimen name="grid_view_select_icon_paddingtop">5dp</dimen>
+    <!-- transsion end -->
+
+    <dimen name="filtershow_editor_panel_height">64dp</dimen>
+    <dimen name="filtershow_editor_panel_margin_right">34dp</dimen>
+
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.26 -->
+    <dimen name="filtershow_bottom_text_height">16dp</dimen>
+    <dimen name="filtershow_bottom_button_width">90dp</dimen>
+    <dimen name="filtershow_bottom_button_height">57dp</dimen>
+    <dimen name="filtershow_top_button_width">120dp</dimen>
+    <dimen name="filtershow_top_button_paddingstart">16dp</dimen>
+    <dimen name="filtershow_top_button_paddingtop">22dp</dimen>
+    <dimen name="filtershow_top_button_paddingend">16dp</dimen>
+    <dimen name="filtershow_top_button_textsize">18sp</dimen>
+    <dimen name="filtershow_top_button_layout_height">58dp</dimen>
+    <!-- transsion end -->
+
 </resources>

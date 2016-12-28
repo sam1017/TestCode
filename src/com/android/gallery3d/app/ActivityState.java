@@ -21,15 +21,20 @@
 
 package com.android.gallery3d.app;
 
+import java.io.File;
+
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.os.BatteryManager;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.HapticFeedbackConstants;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -37,6 +42,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.View.OnClickListener;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 
 import com.android.gallery3d.R;
 import com.android.gallery3d.anim.StateTransitionAnimation;
@@ -45,6 +54,17 @@ import com.android.gallery3d.ui.GLView;
 import com.android.gallery3d.ui.MyActionBar;
 import com.android.gallery3d.ui.PreparePageFadeoutTexture;
 import com.android.gallery3d.util.GalleryUtils;
+
+
+// transsion begin, IB-02533, xieweiwei, add, 2016.11.28
+import android.view.LayoutInflater;
+// transsion end
+
+import android.view.inputmethod.InputMethodManager;
+// transsion begin, IB-02533, xieweiwei, add, 2016.11.29
+import android.os.Handler;
+import android.os.Message;
+// transsion end
 
 abstract public class ActivityState {
     protected static final int FLAG_HIDE_ACTION_BAR = 1;
@@ -57,6 +77,7 @@ abstract public class ActivityState {
     public static final int ACTION_FLAG_STANDARD = 0;
     public static final int ACTION_FLAG_TABS = 1;
 	private static final int ACTION_FLAG_INDETERMINATE = 2;
+    private final String FOLDER_PATH = "/" + Environment.DIRECTORY_DCIM + "/";
 
     protected AbstractGalleryActivity mActivity;
     protected Bundle mData;
@@ -88,6 +109,27 @@ abstract public class ActivityState {
     private static final int STATE_SHOW = 0;
     private static final int STATE_HIDE = 1;
     private int mMyActionBarState = STATE_INVALID;
+    protected static ImageView mCameraImageView;
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+    protected static ImageView mNewFolderImageView;
+    // transsion end
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.28
+    private LayoutInflater mInflater;
+    private int mCameraLayoutWidth;
+    private int mCameraLayoutHeight;
+    protected static View mCameraLayoutView;
+    // transsion end
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+    protected static final int DO_CREATE = 100;
+    protected static final int DO_RESUME = 101;
+    protected static final int DO_CREATE_AND_RESUME = 102;
+    protected int DELAY_TIME_TO_RESUME = 200;
+    protected boolean mHasDoResume = false;
+    protected boolean mHasDoCreate = false;
+    // transsion end
 
     protected ActivityState() {
     }
@@ -100,13 +142,46 @@ abstract public class ActivityState {
         }
         mContentPane.setBackgroundColor(getBackgroundColor());
         //mActivity.getGLRoot().setContentPane(mContentPane);
-        Log.w(TAG,"setContentPane mTabIndex = " + mTabIndex);
-        mActivity.getViewPagerHelper().setContentPane(mTabIndex, mContentPane);
+
+        // transsion begin, IB-02533, xieweiwei, modify, 2016.12.19
+        //Log.w(TAG,"setContentPane mTabIndex = " + mTabIndex);
+        //mActivity.getViewPagerHelper().setContentPane(mTabIndex, mContentPane);
+        mActivity.getGLRoot().setContentPane(mContentPane);
+        // transsion end
     }
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.19
+    protected void setTabContentPane(GLView content) {
+        mContentPane = content;
+        if (mIntroAnimation != null) {
+            mContentPane.setIntroAnimation(mIntroAnimation);
+            mIntroAnimation = null;
+        }
+        mContentPane.setBackgroundColor(getBackgroundColor());
+        Log.w(TAG,"setContentPane mTabIndex = " + mTabIndex);
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.21
+        if (mActivity.getViewPagerHelper() != null) {
+        // transsion end
+        mActivity.getGLRoot().setContentPane(mActivity.getViewPagerHelper().getGlViewPager());
+        mActivity.getViewPagerHelper().setContentPane(mTabIndex, mContentPane);
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.21
+        } else {
+            mActivity.getGLRoot().setContentPane(mContentPane);
+        }
+        // transsion end
+    }
+    // transsion end
 
     void initialize(AbstractGalleryActivity activity, Bundle data) {
         mActivity = activity;
         mData = data;
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.11.28
+        mInflater = LayoutInflater.from(mActivity);
+        mCameraLayoutWidth = (int)activity.getResources().getDimensionPixelSize(R.dimen.camera_indicator_layout_width);
+        mCameraLayoutHeight = (int)activity.getResources().getDimensionPixelSize(R.dimen.camera_indicator_layout_height);
+        // transsion end
+
     }
 
     void initialize(AbstractGalleryActivity activity, Bundle data, int tabIndex) {
@@ -114,6 +189,13 @@ abstract public class ActivityState {
         mData = data;
         mTabIndex = tabIndex;
         Log.w(TAG,"initialize data = " + data + " tabIndex = " + tabIndex);
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.11.28
+        mInflater = LayoutInflater.from(mActivity);
+        mCameraLayoutWidth = (int)activity.getResources().getDimensionPixelSize(R.dimen.camera_indicator_layout_width);
+        mCameraLayoutHeight = (int)activity.getResources().getDimensionPixelSize(R.dimen.camera_indicator_layout_height);
+        // transsion end
+
     }
 
     public int getTabIndex() {
@@ -125,6 +207,7 @@ abstract public class ActivityState {
     }
 
     protected void onBackPressed() {
+        Log.w(TAG,"onBackPressed finishState " + this);
         mActivity.getStateManager().finishState(this);
     }
 
@@ -343,7 +426,7 @@ abstract public class ActivityState {
 
             case STATE_HIDE:
                 actionBar.setVisibility(View.GONE);
-                hideStateBar();
+                //hideStateBar();
                 break;
 
             default:
@@ -357,6 +440,10 @@ abstract public class ActivityState {
         ((Activity) mActivity).getWindow().setFlags(flag, flag);
         ((Activity) mActivity).getWindow().clearFlags(
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        mActivity.getGLRoot().setLightsOutMode(false);
+        // transsion end
+
     }
 
     protected void hideStateBar() {
@@ -365,42 +452,73 @@ abstract public class ActivityState {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         ((Activity) mActivity).getWindow().clearFlags(
                 WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+        ((Activity) mActivity).getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        mActivity.getGLRoot().setLightsOutMode(true);
+        // transsion end
+
     }
     
     protected boolean isUpdateMenuEnable() {
-        return mActivity.getStateManager().isUpdateMenuEnable(this);
+        boolean flag = mActivity.getStateManager().isUpdateMenuEnable(this);
+        Log.w(TAG,"isUpdateMenuEnable this = " + this + " flag = " + flag);
+        return flag;
     }
 
 	protected void updateActionNavigationMode() {
         MyActionBar myActionBar = mActivity.getMyActionBar();
         Log.w(TAG,"updateActionNavigationMode 1");
-        if (myActionBar.isInSelectedMode()) {
+        if (!isUpdateMenuEnable() || myActionBar.isInSelectedMode()) {
+            Log.w(TAG,"updateActionNavigationMode 1 return");
             return;
         }
         ActionBar actionBar = ((Activity) mActivity).getActionBar();
         Log.w(TAG,"updateActionNavigationMode mActionFlags = " + mActionFlags);
         switch (mActionFlags) {
             case ACTION_FLAG_STANDARD:
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+                if (actionBar != null) {
+                // transsion end
                 actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_STANDARD);
                 actionBar.setDisplayOptions(ActionBar.DISPLAY_HOME_AS_UP
                         | ActionBar.DISPLAY_SHOW_TITLE, ActionBar.DISPLAY_HOME_AS_UP
                         | ActionBar.DISPLAY_SHOW_TITLE);
                 actionBar.setHomeButtonEnabled(true);
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+                }
+                // transsion end
                 if (mActivity.getViewPagerHelper() != null) {
                     mActivity.getViewPagerHelper().setHorizontalEnable(false);
                 }
                 break;
 
             case ACTION_FLAG_TABS:
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.21
+                if (mActivity.getTabViewManager() == null) {
+                    return;
+                }
+                // transsion end
                 mActivity.getTabViewManager().lockTabIndex();
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+                if (actionBar != null) {
+                // transsion end
                 actionBar.setDisplayShowTitleEnabled(false);
                 actionBar.setDisplayShowHomeEnabled(false);
                 actionBar.setDisplayHomeAsUpEnabled(false);
                 actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+                }
+                // transsion end
                 int index = mActivity.getTabViewManager().getCurrentTabIndex();
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+                if (actionBar != null) {
+                // transsion end
                 if (index != actionBar.getSelectedNavigationIndex()) {
                     actionBar.setSelectedNavigationItem(index);
                 }
+                // transsion begin, IB-02533, xieweiwei, add, 2016.12.10
+                }
+                // transsion end
                 mActivity.getTabViewManager().unlockTabIndex();
                 if (mActivity.getViewPagerHelper() != null) {
                     mActivity.getViewPagerHelper().setHorizontalEnable(
@@ -443,7 +561,7 @@ abstract public class ActivityState {
             return;
         }
         stateC--;
-        Log.d(TAG, "destroy\t stateC = " + stateC);
+        Log.d(TAG, "destroy\t stateC = " + stateC + " " + this);
         mDestroyed = true;
     }
 
@@ -514,4 +632,204 @@ abstract public class ActivityState {
 		// TODO Auto-generated method stub
 		
 	}
+
+    protected void hideCameraView(){
+        Log.w(TAG, "hideCameraView mCameraImageView = " + mCameraImageView);
+        if(mCameraImageView != null){
+            Log.w(TAG, "hideCameraView setVisibility");
+            mCameraImageView.setVisibility(View.INVISIBLE);
+            // transsion begin, IB-02533, xieweiwei, add, 2016.11.28
+            if(mCameraLayoutView != null) mCameraLayoutView.setVisibility(View.INVISIBLE);
+            // transsion end
+
+            // transsion begin, IB-02533,xieweiwei, add, 2016.12.08
+            if(mNewFolderImageView != null) mNewFolderImageView.setVisibility(View.GONE);
+            // transsion end
+        }
+    }
+
+    protected void showCameraView() {
+	    // TODO Auto-generated method stub
+        Log.w(TAG, "showCameraView mCameraImageView = " + mCameraImageView);
+        if (mCameraImageView == null && !setupCameraView()) return;
+        Log.w(TAG, "showCameraView setVisibility");
+        mCameraImageView.setVisibility(View.VISIBLE);
+        // transsion begin, IB-02533, xieweiwei, add, 2016.11.28
+        if(mCameraLayoutView != null) mCameraLayoutView.setVisibility(View.VISIBLE);
+        // transsion end
+
+        // transsion begin, IB-02533,xieweiwei, add, 2016.12.08
+        if(mNewFolderImageView != null) mNewFolderImageView.setVisibility(View.GONE);
+        // transsion end
+	}
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+    protected void hideNewFolderView(){
+        Log.w(TAG, "hideNewFolderView mNewFolderImageView = " + mNewFolderImageView);
+        if(mNewFolderImageView != null){
+            if(mCameraImageView != null)  mCameraImageView.setVisibility(View.GONE);
+            if(mCameraLayoutView != null) mCameraLayoutView.setVisibility(View.INVISIBLE);
+            mNewFolderImageView.setVisibility(View.INVISIBLE);
+        }
+    }
+
+    protected void showNewFolderView() {
+        Log.w(TAG, "showNewFolderView mNewFolderImageView = " + mNewFolderImageView);
+        if (mNewFolderImageView == null && !setupCameraView()) return;
+        if(mCameraImageView != null) mCameraImageView.setVisibility(View.GONE);
+        if(mCameraLayoutView != null) mCameraLayoutView.setVisibility(View.VISIBLE);
+        mNewFolderImageView.setVisibility(View.VISIBLE);
+    }
+    // transsion end
+
+    protected boolean setupCameraView() {
+	    // TODO Auto-generated method stub
+        if (!GalleryUtils.isCameraAvailable(mActivity)) return false;
+        RelativeLayout galleryRoot = (RelativeLayout) ((Activity) mActivity)
+                .findViewById(R.id.gallery_root);
+        if (galleryRoot == null) return false;
+
+        // transsion begin, IB-02533, xieweiwei, modify, 2016.11.28
+        //mCameraImageView = new ImageView(mActivity);
+        mCameraLayoutView = mInflater.inflate(R.layout.camera_indicator, null);
+        mCameraImageView = (ImageView)mCameraLayoutView.findViewById(R.id.camera_indicator);
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, add, 2016.12.08
+        mNewFolderImageView = (ImageView)mCameraLayoutView.findViewById(R.id.newfolder_indicator);
+        mNewFolderImageView.setOnClickListener(new OnClickListener(){
+            @Override
+            public void onClick(View v) {
+                // TODO Auto-generated method stub
+                LayoutInflater factory = LayoutInflater.from(mActivity);
+                final View textEntryView = factory.inflate(R.layout.alert_dialog_text_entry, null);
+                final EditText inputServer = (EditText)textEntryView.findViewById(R.id.username_edit);
+                inputServer.setFocusable(true);
+                inputServer.setFocusableInTouchMode(true);
+                inputServer.requestFocus();
+                mMainHandler.postDelayed(new Runnable(){
+                    @Override
+                    public void run() {
+                        InputMethodManager inputManager = (InputMethodManager)mActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+                        inputManager.showSoftInput(inputServer, 0);
+                    }
+                }, 80);
+                String tempStr = mActivity.getResources().getString(R.string.add_new_gallery_folder);
+                int i = 1;
+                while(new File(Environment.getExternalStorageDirectory() + FOLDER_PATH + tempStr + i).exists()){
+                    i++;
+                }
+                final String hintStr = tempStr + i;
+                inputServer.setHint(hintStr);
+                new AlertDialog.Builder(mActivity)
+                    //.setTitle(R.string.add_new_gallery_folder)
+                    .setView(textEntryView)
+                    .setPositiveButton(R.string.dialog_ok, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            /* User clicked OK so do some stuff */
+                            if(inputServer.getText().toString().length() == 0){
+                                inputServer.setText(hintStr);
+                            }
+                            Log.w(TAG,"new Folder: " + inputServer.getText().toString());
+                            //File dir = new File(Environment.getExternalStorageDirectory() + FOLDER_PATH + inputServer.getText().toString());
+                            //if (!dir.exists()){
+                            //    Log.d(TAG, "dir not exit,will create this, path = " + Environment.getExternalStorageDirectory() + FOLDER_PATH + inputServer.getText().toString());
+                            //    dir.mkdirs();
+                                ActivityState state = mActivity.getStateManager().getTopState();
+                                if((state instanceof AlbumSetPage)){
+                                    state.newfolderpickuppicture(Environment.getExternalStorageDirectory() + FOLDER_PATH + inputServer.getText().toString());
+                                }
+                            //}
+                        }
+                    })
+                    .setNegativeButton(R.string.review_cancel, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int whichButton) {
+                            /* User clicked cancel so do some stuff */
+                        }
+                    })
+                    .create().show();
+            }
+        });
+        // transsion end
+
+        //mCameraImageView.setImageDrawable(new Drawable(BitmapFactory.decodeResource(mActivity.getResources(), R.drawable.camera_click)));
+        mCameraImageView.setImageResource(R.drawable.camera_click);
+        mCameraImageView.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                GalleryUtils.startCameraActivity(mActivity);
+            }
+        });
+        // transsion begin, IB-02533, xieweiwei, modify, 2016.11.28
+        //RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(
+        //        RelativeLayout.LayoutParams.WRAP_CONTENT,
+        //        RelativeLayout.LayoutParams.WRAP_CONTENT);
+        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(mCameraLayoutWidth, mCameraLayoutHeight);
+        // transsion end
+        // transsion begin, IB-02533, xieweiwei, modify, 2016.12.01
+        //lp.addRule(RelativeLayout.ALIGN_PARENT_RIGHT);
+        lp.addRule(RelativeLayout.CENTER_HORIZONTAL);
+        // transsion end
+        lp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM);
+
+        // transsion begin, IB-02533, xieweiwei, delete, 2016.12.01
+        //lp.rightMargin = 28;
+        //lp.bottomMargin = 30;
+        // transsion end
+
+        // transsion begin, IB-02533, xieweiwei, modify, 2016.11.28
+        //galleryRoot.addView(mCameraImageView, lp);
+        galleryRoot.addView(mCameraLayoutView, lp);
+        // transsion end
+        return true;
+	}
+
+    protected void newfolderpickuppicture(String path) {
+        // TODO Auto-generated method stub
+    }
+
+	// transsion begin, IB-02533, xieweiwei, add, 2016.11.30
+    protected void doResume() {
+    }
+
+    protected void doCreate() {
+    }
+
+    protected void delayDoResume() {
+        mHasDoResume = false;
+        mMainHandler.sendEmptyMessageDelayed(ActivityState.DO_CREATE_AND_RESUME, DELAY_TIME_TO_RESUME);
+    }
+
+    protected Handler mMainHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+            case DO_CREATE:
+                doCreate();
+                mHasDoCreate = true;
+                break;
+            case DO_RESUME:
+                doResume();
+                mHasDoResume = true;
+                break;
+            case DO_CREATE_AND_RESUME:
+                if (!mHasDoCreate) {
+                    doCreate();
+                    mHasDoCreate = true;
+                }
+                doResume();
+                mHasDoResume = true;
+            default:
+                break;
+            }
+        }
+    };
+    // transsion end
+
+    // transsion begin, IB-02533, xieweiwei, add, 2016.12.21
+    public void resetCameraAndNewFolderView() {
+        mCameraImageView = null;
+        mNewFolderImageView = null;
+    }
+    // transsion end
 }

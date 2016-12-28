@@ -19,16 +19,16 @@
     <!-- configuration for album set page -->
     <color name="albumset_background">#FFFFFF</color>
     <color name="albumset_placeholder">#333</color>
-    <color name="albumset_label_background">#EE414143</color>
+    <color name="albumset_label_background">#33000000</color>
     <color name="albumset_label_title">#FBFBFB</color>
-    <color name="albumset_label_count">#A9ABAD</color>
+    <color name="albumset_label_count">#FBFBFB</color>
 
     <!-- configuration for album page -->
     <color name="album_background">#FFFFFF</color>
     <color name="album_placeholder">#333</color>
 
     <!-- configuration for photo page -->
-    <color name="photo_background">#000000</color>
+    <color name="photo_background">#FFFFFF</color>
     <color name="photo_placeholder">#333</color>
 
     <!-- configuration for manage cache page -->
@@ -86,5 +86,27 @@
     <color name="timer_album_page_map_title_text_color">#AFFFFFFF</color>
     <color name="timer_album_page_map_title_bg_color">#80000000</color>
     <!-- timershafttime color -->
-    
+
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.11.16 -->
+    <color name="actionbar_tab_textcolor_selected">#ff007aff</color>
+    <color name="actionbar_tab_textcolor_normal">#ffa4a3a3</color>
+    <!-- transsion end -->
+
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.11.28 -->
+    <color name="ripple_effect_color">#cccccc</color>
+    <!-- transsion end -->
+
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.08 -->
+    <color name="rippelColor">#FFFFFF</color>
+    <!-- transsion end -->
+
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.08 -->
+    <color name="actionbar_standant_textcolor">#000000</color>
+    <color name="actionbar_cluster_textcolor">#000000</color>
+    <color name="actionbar_cluster_sub_textcolor">#999999</color>
+    <color name="actionbar_selection_mode_textcolor">#000000</color>
+    <color name="actionbar_background_color">#ffffff</color>
+    <!-- transsion end -->
+    <color name="filtershow_button_selected_background_color">#ffc600</color>
+
 </resources>

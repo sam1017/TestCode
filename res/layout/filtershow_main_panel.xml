@@ -16,6 +16,7 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:trassion="http://schemas.android.com/apk/res/com.android.gallery3d"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:baselineAligned="false"
@@ -23,6 +24,9 @@
               android:animateLayoutChanges="false"
               android:visibility="visible"
               android:background="@color/background_main_toolbar" >
+    <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.27 -->
+    <!-- xmlns:trassion="http://schemas.android.com/apk/res/com.android.gallery3d" -->
+    <!-- transsion end -->
 
     <FrameLayout android:id="@+id/state_panel_container"
                  android:layout_width="match_parent"
@@ -47,7 +51,7 @@
             xmlns:custom="http://schemas.android.com/apk/res/com.android.gallery3d"
             android:id="@+id/bottom_panel"
             android:layout_width="match_parent"
-            android:layout_height="48dip"
+            android:layout_height="57dip"
             android:layout_gravity="center|bottom"
             custom:max_width="400dip"
             android:orientation="vertical">
@@ -56,44 +60,148 @@
                       android:layout_height="match_parent"
                       android:background="@color/background_main_toolbar">
 
-            <ImageButton
-                    android:id="@+id/fxButton"
-                    android:layout_width="@dimen/thumbnail_size"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@drawable/filtershow_button_background"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/ic_photoeditor_effects"/>
+        <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.27 -->
+        <com.transsion.gallery3d.ui.RippleView
+            android:layout_width="0dp"
+            android:layout_height="@dimen/filtershow_bottom_button_height"
+            trassion:rv_color="@color/ripple_effect_color"
+            android:layout_weight="1">
+        <!-- transsion end -->
 
             <ImageButton
-                    android:id="@+id/borderButton"
-                    android:layout_width="@dimen/thumbnail_size"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@drawable/filtershow_button_background"
-                    android:padding="2dip"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/ic_photoeditor_border"/>
+                android:id="@+id/fxButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleType="center"
+                android:layout_gravity="center"
+                android:background="@drawable/filtershow_bottom_button_fx"
+                />
+
+        <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.12.27 -->
+        <!-- android:layout_width="@dimen/thumbnail_size"
+             android:layout_height="match_parent"
+             android:layout_weight="1"
+             android:background="@drawable/filtershow_button_background"
+             android:scaleType="centerInside"
+             android:src="@drawable/ic_photoeditor_effects" -->
+        <!-- android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:scaleType="center"
+             android:layout_gravity="center"
+             android:background="@drawable/filtershow_bottom_button_fx" -->
+        <!-- transsion end -->
+
+        <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.27 -->
+        </com.transsion.gallery3d.ui.RippleView>
+        <!-- transsion end -->
+
+        <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.27 -->
+        <com.transsion.gallery3d.ui.RippleView
+            android:layout_width="0dp"
+            android:layout_height="@dimen/filtershow_bottom_button_height"
+            trassion:rv_color="@color/ripple_effect_color"
+            android:layout_weight="1">
+        <!-- transsion end -->
 
             <ImageButton
-                    android:id="@+id/geometryButton"
-                    android:layout_width="@dimen/thumbnail_size"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@drawable/filtershow_button_background"
-                    android:padding="2dip"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/ic_photoeditor_fix"/>
+                android:id="@+id/borderButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleType="center"
+                android:layout_gravity="center"
+                android:background="@drawable/filtershow_bottom_button_border"
+              />
+
+        <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.12.27 -->
+        <!-- android:layout_width="@dimen/thumbnail_size"
+             android:layout_height="match_parent"
+             android:layout_weight="1"
+             android:background="@drawable/filtershow_button_background"
+             android:padding="2dip"
+             android:scaleType="centerInside"
+             android:src="@drawable/ic_photoeditor_border" -->
+        <!-- android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:scaleType="center"
+             android:layout_gravity="center"
+             android:background="@drawable/filtershow_bottom_button_border" -->
+        <!-- transsion end -->
+
+        <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.27 -->
+        </com.transsion.gallery3d.ui.RippleView>
+        <!-- transsion end -->
+
+        <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.27 -->
+        <com.transsion.gallery3d.ui.RippleView
+            android:layout_width="0dp"
+            android:layout_height="@dimen/filtershow_bottom_button_height"
+            trassion:rv_color="@color/ripple_effect_color"
+            android:layout_weight="1">
+        <!-- transsion end -->
 
             <ImageButton
-                    android:id="@+id/colorsButton"
-                    android:layout_width="@dimen/thumbnail_size"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:background="@drawable/filtershow_button_background"
-                    android:padding="2dip"
-                    android:scaleType="centerInside"
-                    android:src="@drawable/ic_photoeditor_color"/>
+                android:id="@+id/geometryButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleType="center"
+                android:layout_gravity="center"
+                android:background="@drawable/filtershow_bottom_button_geometry"
+                 />
+
+        <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.12.27 -->
+        <!-- android:layout_width="@dimen/thumbnail_size"
+             android:layout_height="match_parent"
+             android:layout_weight="1"
+             android:background="@drawable/filtershow_button_background"
+             android:padding="2dip"
+             android:scaleType="centerInside"
+             android:src="@drawable/ic_photoeditor_fix" -->
+        <!-- android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:scaleType="center"
+             android:layout_gravity="center"
+             android:background="@drawable/filtershow_bottom_button_geometry" -->
+        <!-- transsion end -->
+
+        <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.27 -->
+        </com.transsion.gallery3d.ui.RippleView>
+        <!-- transsion end -->
+
+        <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.27 -->
+        <com.transsion.gallery3d.ui.RippleView
+            android:layout_width="0dp"
+            android:layout_height="@dimen/filtershow_bottom_button_height"
+            trassion:rv_color="@color/ripple_effect_color"
+            android:layout_weight="1">
+        <!-- transsion end -->
+
+            <ImageButton
+                android:id="@+id/colorsButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:scaleType="center"
+                android:layout_gravity="center"
+                android:background="@drawable/filtershow_bottom_button_color"
+                />
+
+        <!-- transsion begin, IB-02533, xieweiwei, modify, 2016.12.27 -->
+        <!-- android:layout_width="@dimen/thumbnail_size"
+             android:layout_height="match_parent"
+             android:layout_weight="1"
+             android:background="@drawable/filtershow_button_background"
+             android:padding="2dip"
+             android:scaleType="centerInside"
+             android:src="@drawable/ic_photoeditor_color" -->
+        <!-- android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             android:scaleType="center"
+             android:layout_gravity="center"
+             android:background="@drawable/filtershow_bottom_button_color" -->
+        <!-- transsion end -->
+
+        <!-- transsion begin, IB-02533, xieweiwei, add, 2016.12.27 -->
+        </com.transsion.gallery3d.ui.RippleView>
+        <!-- transsion end -->
 
         </LinearLayout>
 

@@ -147,13 +147,13 @@
     <string name="unknown" msgid="3506693015896912952">"Desconhecida"</string>
     <string name="ffx_original" msgid="372686331501281474">"Original"</string>
     <string name="ffx_vintage" msgid="8348759951363844780">"Vintage"</string>
-    <string name="ffx_instant" msgid="726968618715691987">"Instant"</string>
-    <string name="ffx_bleach" msgid="8946700451603478453">"Bleach"</string>
+    <string name="ffx_instant" msgid="726968618715691987">"Instante"</string>
+    <string name="ffx_bleach" msgid="8946700451603478453">"Branquear"</string>
     <string name="ffx_blue_crush" msgid="6034283412305561226">"Azul"</string>
     <string name="ffx_bw_contrast" msgid="517988490066217206">"P/B"</string>
-    <string name="ffx_punch" msgid="1343475517872562639">"Punch"</string>
+    <string name="ffx_punch" msgid="1343475517872562639">"Soco"</string>
     <string name="ffx_x_process" msgid="4779398678661811765">"Processo X"</string>
-    <string name="ffx_washout" msgid="4594160692176642735">"Latte"</string>
+    <string name="ffx_washout" msgid="4594160692176642735">"Café com leite"</string>
     <string name="ffx_washout_color" msgid="8034075742195795219">"Litografia"</string>
   <plurals name="make_albums_available_offline">
     <item quantity="one" msgid="2171596356101611086">"Disponibilizar álbum offline."</item>
@@ -441,4 +441,24 @@
         <item quantity="one">%1$d item seleccionado</item>
         <item quantity="other">%1$d itens seleccionados</item>
     </plurals>
+	
+    <string name="current_week_sunday">"Domingo"</string>
+    <string name="current_week_monday">"segunda-feira"</string>
+    <string name="current_week_tuesday">"terça-feira"</string>
+    <string name="current_week_wednesday">"quarta-feira"</string>
+    <string name="current_week_thursday">"quinta-feira"</string>
+    <string name="current_week_friday">"sexta-feira"</string>
+    <string name="current_week_saturday">"sábado"</string>
+    <string name="last_week_sunday">"Último domingo"</string>
+    <string name="last_week_monday">"segunda-feira passada"</string>
+    <string name="last_week_tuesday">"Terça-feira passada"</string>
+    <string name="last_week_wednesday">"Última quarta-feira"</string>
+    <string name="last_week_thursday">"Última quinta"</string>
+    <string name="last_week_friday">"Última sexta-feira"</string>
+    <string name="last_week_saturday">"Último sábado"</string>
+	<string name="today">Hoje</string>
+    <string name="yesterday">ontem</string>
+
+    <string name="action_funny">Celebridade</string>
+	
 </resources>

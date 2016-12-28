@@ -28,6 +28,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.util.Log;
 
 import com.android.gallery3d.anim.StateTransitionAnimation;
 import com.android.gallery3d.common.Utils;
@@ -219,6 +220,10 @@ public class StateManager {
     void finishState(ActivityState state, boolean fireOnPause) {
         // The finish() request could be rejected (only happens under Monkey),
         // If it is rejected, we won't close the last page.
+        Log.v(TAG, "finishState " + state);
+        if((state instanceof AlbumSetPage)||(state instanceof NewTimerShaftPage)){
+            Log.d(TAG, Log.getStackTraceString(new Throwable()));
+        }
         if (mStack.size() == 1) {
             Activity activity = (Activity) mActivity.getAndroidContext();
             if (mResult != null) {
@@ -239,7 +244,6 @@ public class StateManager {
         }
         /// @}
 
-        Log.v(TAG, "finishState " + state);
         if (state != mStack.peek().activityState) {
             if (state.isDestroyed()) {
                 Log.d(TAG, "The state is already destroyed");
@@ -263,7 +267,15 @@ public class StateManager {
             state.pause();
         }
         if (!mStack.isEmpty()) {
+            // transsion begin, IB_02533, xieweiwei, add, 2016.12.21
+            if (mActivity.getViewPagerHelper() == null) {
+                mActivity.getGLRoot().setContentPane(null);
+            } else {
+            // transsion end
             mActivity.getViewPagerHelper().setContentPane(state.getTabIndex(), null);
+            // transsion begin, IB_02533, xieweiwei, add, 2016.12.21
+            }
+            // transsion end
         } else {
             mActivity.getGLRoot().setContentPane(null);
         }
@@ -429,7 +441,7 @@ public class StateManager {
 //        Parcelable list[] = new Parcelable[mStack.size()];
         int i = 0;
         for (Stack<StateEntry> stack : mStacks) {
-            for (StateEntry entry : mStack) {
+            for (StateEntry entry : stack) {
                 Bundle bundle = new Bundle();
                 bundle.putSerializable(KEY_CLASS, entry.activityState.getClass());
                 bundle.putBundle(KEY_DATA, entry.data);
@@ -505,6 +517,16 @@ public class StateManager {
         ((Activity) mActivity).invalidateOptionsMenu();
         if (!mStack.isEmpty()) {
             mStack.peek().activityState.onUpdateMenu();
+        }
+
+        // transsion begin, IB_02533, xieweiwei, add, 2016.12.08
+        if (!mStack.isEmpty()) {
+            if (tabIndex == 0) {
+                mStack.peek().activityState.showCameraView();
+            } else { // if (tabIndex == 1) {
+                mStack.peek().activityState.showNewFolderView();
+            }
+            // transsion end
         }
     }
 

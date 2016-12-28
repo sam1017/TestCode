@@ -80,6 +80,7 @@ public interface GLCanvas {
     public static final int SAVE_FLAG_ALL = 0xFFFFFFFF;
     public static final int SAVE_FLAG_ALPHA = 0x01;
     public static final int SAVE_FLAG_MATRIX = 0x02;
+    public static final int SAVE_FLAG_CLIP = 0x04;
 
     // Pops from the top of the stack as current configuration state (matrix,
     // alpha, and clip). This call balances a previous call to save(), and is
@@ -228,5 +229,5 @@ public interface GLCanvas {
 
     public abstract MGLCanvas getMGLCanvas();
 
-	public void clipRect(int i, int j, int width, int height);
+	public boolean clipRect(int i, int j, int width, int height);
 }
